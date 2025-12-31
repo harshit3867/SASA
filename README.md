@@ -1,2 +1,1 @@
-# SASA
-A comprehensive last-mile operations suite that provides interactive tools for reporting, live tracking, projections, pendency management, and automated operational calculations.
+This project is not limited to static reports — it includes multiple interactive tools that perform automated calculations, analyze performance metrics, track pendency, and support data-driven decision-making in last-mile operations.
