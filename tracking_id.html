@@ -89,6 +89,7 @@ body.dark .fileBox{
     justify-content:space-between;
     align-items:center;
     margin-bottom:6px;
+    flex-wrap:wrap;
 }
 
 .cityName{
@@ -118,7 +119,7 @@ body.dark .countText{
 
 .textareaBox{
     width:100%;
-    height:170px;
+    min-height:170px;
     resize:none;
     padding:10px;
     border-radius:12px;
@@ -141,11 +142,6 @@ body.dark .upload-card{
     background:rgba(0,0,0,.55);
     color:white;
 }
-
-html{
-    zoom:110%;
-}
-
 
 /* DARK TOGGLE */
 .toggle-dark{
@@ -180,18 +176,6 @@ html{
     33%{content:".."}
     66%{content:"..."}
 }
-
-/* PARTICLES */
-.particle{
-    position:fixed;
-    border-radius:50%;
-    background:rgba(255,255,255,.35);
-    animation:floatUp 12s linear infinite;
-}
-@keyframes floatUp{
-    from{transform:translateY(100vh) scale(.6);opacity:.8}
-    to{transform:translateY(-10vh) scale(1.2);opacity:0}
-}
 </style>
 </head>
 
@@ -204,7 +188,7 @@ html{
 </div>
 
 <!-- DARK MODE -->
-<div class="toggle-dark" onclick="toggleDark()">🌙 / ☀️</div>
+<div class="toggle-dark" onclick="document.body.classList.toggle('dark')">🌙 / ☀️</div>
 
 <!-- HEADER -->
 <div class="header-main">
@@ -212,27 +196,14 @@ html{
     <h1>Tracking ID Extractor – SASA</h1>
 </div>
 
-<!-- FLOATING PARTICLES -->
-<script>
-for(let i=0;i<15;i++){
-    const p=document.createElement("div");
-    p.className="particle";
-    const size=Math.random()*8+4;
-    p.style.width=p.style.height=size+"px";
-    p.style.left=Math.random()*100+"%";
-    p.style.animationDuration=10+Math.random()*10+"s";
-    document.body.appendChild(p);
-}
-</script>
-
 <!-- MAIN CARD -->
 <div class="container">
 
     <h2 style="text-align:center">Tracking ID Extractor</h2>
-    <p style="text-align:center">Upload files and get Tracking IDs warehouse-wise</p>
+    <p style="text-align:center">Auto applies column logic based on Column B header</p>
 
     <div class="upload-card">
-        Upload your raw files<br><br>
+        Upload raw files<br><br>
         <input type="file" id="fileUpload" multiple>
     </div>
 
@@ -240,71 +211,90 @@ for(let i=0;i<15;i++){
 
 </div>
 
-<!-- TICKER -->
-<div class="ticker-bar" style="position:fixed;bottom:15px;width:100%;background:rgba(0,48,94,.92);color:white;padding:7px 0;overflow:hidden;">
-    <div class="ticker-content" style="white-space:nowrap;display:inline-block;padding-left:100%;animation:marq 35s linear infinite;">
-       Tracking ID extractor is part of SASA – Zippee Strategic Analytics Suite, developed by Mr. Harshit Saini (Control Tower Team)
-    </div>
-</div>
-
 <script>
 /* LOADER */
-window.onload=()=>setTimeout(()=>loader.style.display="none",1000);
+window.onload=()=>setTimeout(()=>loader.style.display="none",900);
 
-/* DARK MODE */
-function toggleDark(){document.body.classList.toggle("dark")}
-
-/* Mapping Warehouse -> City */
+/* CITY MAP */
 function detectCity(warehouseCodes){
     const w = warehouseCodes.join(" ").toLowerCase();
+
     if(w.includes("ahd")) return "Prayagraj";
     if(w.includes("sil")) return "Siliguri";
-    if(w.includes("mrd")) return "Moradabad";
+    if(w.includes("mor") || w.includes("mrd")) return "Moradabad";
     if(w.includes("sur")) return "Surat";
     if(w.includes("nsk")) return "Nasik";
     if(w.includes("vdr")) return "Vadodara";
+
     return "City Not Detected";
 }
 
-/* Copy */
+/* COPY */
 function copyText(id){
     const box=document.getElementById(id);
     box.select();
     navigator.clipboard.writeText(box.value);
 }
 
-/* Main Extractor */
+/* MAIN LOGIC BASED ON YOUR RULE */
 document.getElementById("fileUpload").addEventListener("change", function(e){
 
-    const files=Array.from(e.target.files);
-    const resultArea=document.getElementById("resultArea");
-    resultArea.innerHTML="";
+    const files = Array.from(e.target.files);
+    const resultArea = document.getElementById("resultArea");
+    resultArea.innerHTML = "";
 
     files.forEach((file,index)=>{
 
-        const reader=new FileReader();
+        const reader = new FileReader();
 
-        reader.onload=function(e){
+        reader.onload = function(e){
 
-            const data=new Uint8Array(e.target.result);
-            const workbook=XLSX.read(data,{type:'array'});
-            const sheet=workbook.Sheets[workbook.SheetNames[0]];
-            const json=XLSX.utils.sheet_to_json(sheet,{header:1});
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data,{type:'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-            let trackingIds=[];
+            const header = json[0];
+            const colBHeader = String(header[1]).toLowerCase().trim();
+
+            let warehouseCol = null;
+            let trackingCol = null;
+            let detectedCase = "";
+
+            /* RULE 1: Column B = origin_party_id */
+            if(colBHeader === "origin_party_id"){
+                warehouseCol = 1;   // B
+                trackingCol  = 6;   // G
+                detectedCase = "origin_party_id in B → Tracking ID in G";
+            }
+
+            /* RULE 2: Column B = origin_address_id */
+            else if(colBHeader === "origin_address_id"){
+                warehouseCol = 0;   // A
+                trackingCol  = 5;   // F
+                detectedCase = "origin_address_id in B → Tracking ID in F";
+            }
+
+            else{
+                alert("Column B is neither origin_party_id nor origin_address_id in file: " + file.name);
+                return;
+            }
+
             let warehouseCodes=[];
+            let trackingIds=[];
 
             json.forEach((row,i)=>{
                 if(i===0) return;
-                const wh=row[1];   // column B
-                const tid=row[6];  // column G
+
+                const wh=row[warehouseCol];
+                const tid=row[trackingCol];
+
                 if(wh) warehouseCodes.push(String(wh).toLowerCase());
                 if(tid) trackingIds.push(tid);
             });
 
             const city=detectCity(warehouseCodes);
             const count=trackingIds.length;
-
             const taId="box"+index;
 
             const div=document.createElement("div");
@@ -315,7 +305,12 @@ document.getElementById("fileUpload").addEventListener("change", function(e){
                     <div class="cityName">${city} — ${file.name}</div>
                     <button class="copy-btn" onclick="copyText('${taId}')">Copy All</button>
                 </div>
-                <div class="countText">Total Tracking IDs: <b>${count}</b></div>
+
+                <div class="countText">
+                    Rule Applied: <b>${detectedCase}</b><br>
+                    Total Tracking IDs: <b>${count}</b>
+                </div>
+
                 <textarea id="${taId}" class="textareaBox" readonly>${trackingIds.join("\n")}</textarea>
             `;
 
@@ -325,7 +320,6 @@ document.getElementById("fileUpload").addEventListener("change", function(e){
         reader.readAsArrayBuffer(file);
     });
 });
-
 </script>
 
 </body>
