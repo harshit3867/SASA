@@ -412,8 +412,27 @@ function openChat(){chatBox.style.display="block"}
 function closeChat(){chatBox.style.display="none"}
 </script>
 
+<script>
+// Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Disable F12 and Inspect shortcuts
+document.addEventListener('keydown', function(e){
+
+  if (e.keyCode === 123) e.preventDefault(); // F12
+
+  if (e.ctrlKey && e.shiftKey && ['I','J','C','i','j','c'].includes(e.key))
+      e.preventDefault(); // Ctrl+Shift+I/J/C
+
+  if (e.ctrlKey && ['U','u'].includes(e.key))
+      e.preventDefault(); // Ctrl+U View Source
+});
+</script>
+
+    
 </body>
 </html>
+
 
 
 
