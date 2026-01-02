@@ -429,9 +429,34 @@ document.addEventListener('keydown', function(e){
 });
 </script>
 
+<script>
+// Detect DevTools by window resize gap
+setInterval(function () {
+  const threshold = 160;
+  if (
+    window.outerWidth - window.innerWidth > threshold ||
+    window.outerHeight - window.innerHeight > threshold
+  ) {
+    document.body.innerHTML = "<h2 style='text-align:center;margin-top:40px;'>Dev Tools are not allowed 🚫</h2>";
+  }
+}, 500);
+
+// Block right click
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+// Block keys
+document.addEventListener("keydown", function(e){
+  if (e.keyCode === 123) e.preventDefault();
+  if (e.ctrlKey && e.shiftKey) e.preventDefault();
+  if (e.ctrlKey && ['u','U','c','C','i','I','j','J'].includes(e.key)) e.preventDefault();
+});
+</script>
+
+    
     
 </body>
 </html>
+
 
 
 
