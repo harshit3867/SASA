@@ -154,6 +154,14 @@ th,td{
             </div>
 
             <table id="finalReportTable"></table>
+
+            <!-- footer included in image download -->
+            <div style="display:flex; justify-content:center; align-items:center; margin:12px 0;">
+                <span style="font-size:12px; font-weight:700; text-align:center;">
+                    Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee
+                </span>
+            </div>
+
         </div>
     </div>
 </div>
@@ -368,13 +376,17 @@ function processCombined(json){
 }
 
 function fillDateTime(){
-    const d=new Date();
-    document.getElementById("autoDate").innerText=d.toLocaleDateString('en-GB',{day:"2-digit",month:"short",year:"numeric"});
-    let h=d.getHours(),m=d.getMinutes();
-    let ampm=h>=12?"PM":"AM";
-    h=h%12||12;
-    m=m<10?"0"+m:m;
-    document.getElementById("autoTime").innerText=`${h}:${m} ${ampm}`;
+    const d = new Date();
+
+    document.getElementById("autoDate").innerText =
+        d.toLocaleDateString('en-GB',{day:"2-digit",month:"short",year:"numeric"});
+
+    // hour only
+    let h = d.getHours();
+    let ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+
+    document.getElementById("autoTime").innerText = `${h} ${ampm}`;
 }
 
 function downloadImage(){
@@ -390,6 +402,61 @@ function downloadImage(){
 function shareWhatsApp(){
     alert("WhatsApp sharing coming soon 😊");
 }
+
+/* ------------- SCREENSHOT / COPY DETERRENCE -------------- */
+
+/* Block PrintScreen */
+// stronger detection for Snipping Tool (Win + Shift + anything)
+document.addEventListener("keydown", function(e){
+
+    // metaKey is Windows key on Windows, Command on Mac
+    if (e.shiftKey && e.metaKey) {
+        temporarilyBlur();
+    }
+
+    // direct Shift + S fallback pattern
+    if (e.shiftKey && (e.key.toLowerCase() === "s")) {
+        temporarilyBlur();
+    }
+});
+
+
+/* temporary blur overlay (breaks snip result) */
+function temporarilyBlur() {
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.backdropFilter = "blur(18px)";
+    overlay.style.background = "rgba(255,255,255,0.25)";
+    overlay.style.zIndex = "999999";
+    overlay.style.pointerEvents = "none";
+    document.body.appendChild(overlay);
+    setTimeout(()=> overlay.remove(), 1400);
+}
+
+/* Win+Shift+S cannot be detected — blur on Shift+S */
+document.addEventListener("keydown", function(e){
+    if (e.key.toLowerCase() === "s" && e.shiftKey) {
+        temporarilyBlur();
+    }
+});
+
+/* Block mac Cmd+Shift+3/4 */
+document.addEventListener("keydown", function(e){
+    if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
+        e.preventDefault();
+        temporarilyBlur();
+        alert("Mac screenshot shortcut blocked.");
+    }
+});
+
+/* Disable right click, copy, select */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('copy', e => {
+    e.preventDefault();
+    alert("Copying is disabled on this page.");
+});
 </script>
 
 <script>
@@ -434,7 +501,6 @@ document.addEventListener("keydown", function(e){
 });
 </script>
 
-    
+
 </body>
 </html>
-
