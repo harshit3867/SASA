@@ -100,16 +100,6 @@ button{
     align-items:center;
     z-index:999;
 }
-
-.dots::after{
-    content:"";
-    animation:dots 1.4s steps(4,end) infinite;
-}
-@keyframes dots{
-    0%{content:"."}
-    33%{content:".."}
-    66%{content:"..."}
-}
 </style>
 </head>
 
@@ -117,7 +107,7 @@ button{
 
 <div class="loader-screen" id="loader">
     <img src="SASA.png" height="120"><br>
-    <div>SASA is loading your analytics<span class="dots"></span></div>
+    <div>SASA is loading your analytics...</div>
 </div>
 
 <div class="header-main">
@@ -193,7 +183,6 @@ function computeDZ(nStr){
  return{date:r,text:formatIndian(r)};
 }
 
-/* white background for clean export */
 const whiteBackgroundPlugin={
  beforeDraw:(chart)=>{
   const ctx=chart.canvas.getContext("2d");
@@ -202,7 +191,6 @@ const whiteBackgroundPlugin={
  }
 };
 
-/* watermark drawn INSIDE chart safely */
 const watermarkPlugin = {
   afterDraw: (chart) => {
     const ctx = chart.ctx;
@@ -210,14 +198,10 @@ const watermarkPlugin = {
     ctx.font = "16px Segoe UI";
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
-
-    const x = chart.width / 2;
-    const y = chart.height - 10;  // safe inside area
-
     ctx.fillText(
       "Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee",
-      x,
-      y
+      chart.width / 2,
+      chart.height - 10
     );
     ctx.restore();
   }
@@ -253,8 +237,6 @@ zipInput.addEventListener("change",async e=>{
  const A=0,B=1,C=2,D=3,J=9,N=13,AB=27,AL=37;
 
  detailedExportData=[];
- document.getElementById("detailTable").innerHTML="";
-
  detailedExportData.push(["A","B","C","D","J","N","AB","AL","DZ","Status"]);
 
  const summaryMap={};
@@ -270,6 +252,20 @@ zipInput.addEventListener("change",async e=>{
 
   let status="";
   if(alDate&&dzObj.date)status=(alDate>dzObj.date)?"SLA Breach":"SLA Met";
+
+  // ⭐⭐⭐ ADD ROW TO EXCEL EXPORT ⭐⭐⭐
+  detailedExportData.push([
+    r[A],
+    r[B],
+    r[C],
+    r[D],
+    r[J],
+    r[N],
+    r[AB],
+    r[AL],
+    dzObj.text,
+    status
+  ]);
 
   if(!summaryMap[r[D]])summaryMap[r[D]]={met:0,breach:0,total:0};
   summaryMap[r[D]].total++;
@@ -313,7 +309,7 @@ zipInput.addEventListener("change",async e=>{
  .forEach(v=>{let td=document.createElement("td");td.style.fontWeight="bold";td.innerText=v;gtr.appendChild(td)});
  summary.appendChild(gtr);
 
- /* footer inside table */
+ // footer in table remains same
  let ftr=document.createElement("tr");
  let td=document.createElement("td");
  td.colSpan=6;
@@ -336,7 +332,7 @@ zipInput.addEventListener("change",async e=>{
     ]
   },
   options:{
-    layout:{ padding:{ bottom:40 } },  /* space for watermark */
+    layout:{ padding:{ bottom:40 } },
     responsive:false,
     devicePixelRatio:3,
     plugins:{
@@ -364,6 +360,65 @@ downloadExcelBtn.onclick=()=>{
  XLSX.utils.book_append_sheet(wb,ws,"Detailed");
  XLSX.writeFile(wb,"SDD_Detailed.xlsx");
 };
+</script>
+
+<script>
+/* ---------- existing anti-inspect ---------- */
+setInterval(function () {
+  const threshold = 160;
+  if (
+    window.outerWidth - window.innerWidth > threshold ||
+    window.outerHeight - window.innerHeight > threshold
+  ) {
+    document.body.innerHTML =
+      "<h2 style='text-align:center;margin-top:40px;'>Dev Tools are not allowed 🚫</h2>";
+  }
+}, 500);
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+/* ---------- screenshot protection ---------- */
+
+/* PrintScreen */
+document.addEventListener("keydown", function(e){
+  if (e.key === "PrintScreen") {
+    e.preventDefault();
+    navigator.clipboard.writeText("Screenshots disabled on this page");
+    alert("Print Screen is blocked on this page.");
+  }
+});
+
+/* blur overlay */
+function temporarilyBlur() {
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.backdropFilter = "blur(18px)";
+  overlay.style.background = "rgba(255,255,255,0.25)";
+  overlay.style.zIndex = "999999";
+  overlay.style.pointerEvents = "none";
+  document.body.appendChild(overlay);
+  setTimeout(()=> overlay.remove(), 1400);
+}
+
+/* Win+Shift+S or Cmd+Shift+S */
+document.addEventListener("keydown", function(e){
+  if (e.shiftKey && e.metaKey) temporarilyBlur();
+  if (e.shiftKey && e.key.toLowerCase() === "s") temporarilyBlur();
+});
+
+/* Mac screenshots */
+document.addEventListener("keydown", function(e){
+  if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
+    e.preventDefault();
+    temporarilyBlur();
+    alert("Mac screenshot shortcut blocked.");
+  }
+});
+
+/* disable copy + selection */
+document.addEventListener("copy", e => e.preventDefault());
+document.addEventListener("selectstart", e => e.preventDefault());
 </script>
 
 <script>
@@ -408,7 +463,6 @@ document.addEventListener("keydown", function(e){
 });
 </script>
 
-    
+
 </body>
 </html>
-
