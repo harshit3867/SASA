@@ -20,7 +20,6 @@
     --text-dark:#1d2a38;
     --card-bg:rgba(255,255,255,.15);
 }
-
 body{
     margin:0;
     font-family:"Segoe UI",sans-serif;
@@ -28,7 +27,6 @@ body{
     min-height:100vh;
     overflow-x:hidden;
 }
-
 body::before{
     content:"";
     position:fixed;
@@ -36,7 +34,6 @@ body::before{
     background:rgba(255,255,255,.25);
     z-index:-1;
 }
-
 .header-main{
     background:rgba(0,48,94,.85);
     color:white;
@@ -49,10 +46,8 @@ body::before{
     align-items:center;
     gap:10px;
 }
-
 .header-logo{height:36px}
 h1{margin:0;font-size:22px}
-
 .container{
     margin:110px auto 90px auto;
     width:92%;
@@ -63,21 +58,17 @@ h1{margin:0;font-size:22px}
     backdrop-filter:blur(10px);
     box-shadow:0 8px 30px rgba(0,0,0,.2);
 }
-
-#detailTable{display:none}
-
+#detailTable{display:table}
 th,td{
   border:1px solid #444;
   padding:6px 10px;
   font-size:14px;
   color:var(--text-dark);
 }
-
 table{
   border-collapse:collapse;
   margin:12px auto;
 }
-
 button{
   padding:8px 12px;
   margin:4px;
@@ -88,7 +79,6 @@ button{
   color:white;
   font-weight:600;
 }
-
 .loader-screen{
     position:fixed;
     inset:0;
@@ -237,34 +227,39 @@ zipInput.addEventListener("change",async e=>{
  const A=0,B=1,C=2,D=3,J=9,N=13,AB=27,AL=37;
 
  detailedExportData=[];
- detailedExportData.push(["A","B","C","D","J","N","AB","AL","DZ","Status"]);
+ detailedExportData.push(["A","B","C","D","J","N","AB","AL","DZ","Status"]); // 👈 restored as before
 
  const summaryMap={};
 
- rows.slice(1).forEach(r=>{
+ rows.slice(1).forEach(r=>{   // 👈 restored – detailed table unchanged
+
   if(!allowedStores.has((r[D]||"").toString().trim()))return;
   if((r[AB]||"").toString().trim()!=="Delivered")return;
   if((r[J]||"").toString().trim()!=="Delivery")return;
 
   const nTrim=trimCustom(r[N]);
   const alDate=parseIndianDateTime(trimCustom(r[AL]));
+
+  // -------- D-1 FILTER USING AL COLUMN --------
+  if(!alDate) return;
+
+  let alOnly = new Date(alDate);
+  alOnly.setHours(0,0,0,0);
+
+  let yesterday = new Date();
+  yesterday.setDate(yesterday.getDate()-1);
+  yesterday.setHours(0,0,0,0);
+
+  if(alOnly.getTime() !== yesterday.getTime()) return;
+  // -------------------------------------------
+
   const dzObj=computeDZ(nTrim);
 
   let status="";
   if(alDate&&dzObj.date)status=(alDate>dzObj.date)?"SLA Breach":"SLA Met";
 
-  // ⭐⭐⭐ ADD ROW TO EXCEL EXPORT ⭐⭐⭐
   detailedExportData.push([
-    r[A],
-    r[B],
-    r[C],
-    r[D],
-    r[J],
-    r[N],
-    r[AB],
-    r[AL],
-    dzObj.text,
-    status
+    r[A],r[B],r[C],r[D],r[J],r[N],r[AB],r[AL],dzObj.text,status
   ]);
 
   if(!summaryMap[r[D]])summaryMap[r[D]]={met:0,breach:0,total:0};
@@ -286,8 +281,8 @@ zipInput.addEventListener("change",async e=>{
 
  Object.keys(summaryMap).forEach(store=>{
   const o=summaryMap[store];
-  const mp=Math.round(o.met/o.total*100);
-  const bp=Math.round(o.breach/o.total*100);
+  const mp=Math.round(o.met/o.total*100)||0;
+  const bp=Math.round(o.breach/o.total*100)||0;
 
   let tr=document.createElement("tr");
   [store,o.met,o.breach,o.total,mp+"%",bp+"%"]
@@ -301,15 +296,14 @@ zipInput.addEventListener("change",async e=>{
   gm+=o.met;gb+=o.breach;gt+=o.total;
  });
 
- const GMP=Math.round(gm/gt*100);
- const GBP=Math.round(gb/gt*100);
+ const GMP=Math.round(gm/gt*100)||0;
+ const GBP=Math.round(gb/gt*100)||0;
 
  let gtr=document.createElement("tr");
  ["Grand Total",gm,gb,gt,GMP+"%",GBP+"%"]
  .forEach(v=>{let td=document.createElement("td");td.style.fontWeight="bold";td.innerText=v;gtr.appendChild(td)});
  summary.appendChild(gtr);
 
- // footer in table remains same
  let ftr=document.createElement("tr");
  let td=document.createElement("td");
  td.colSpan=6;
@@ -335,10 +329,21 @@ zipInput.addEventListener("change",async e=>{
     layout:{ padding:{ bottom:40 } },
     responsive:false,
     devicePixelRatio:3,
+
     plugins:{
-      datalabels:{color:"#000",anchor:"end",align:"end",formatter:v=>v+"%"}
+      legend:{ labels:{ color:"#000" } },
+      datalabels:{
+        color:"#000",
+        anchor:"end",
+        align:"end",
+        formatter:v=>v+"%"
+      }
     },
-    scales:{y:{beginAtZero:true,max:100}}
+
+    scales:{
+      x:{ ticks:{ color:"#000" }, title:{ color:"#000" } },
+      y:{ beginAtZero:true, max:100, ticks:{ color:"#000" }, title:{ color:"#000" } }
+    }
   }
  });
 
@@ -362,8 +367,8 @@ downloadExcelBtn.onclick=()=>{
 };
 </script>
 
+<!-- 🔒 BLOCKERS -->
 <script>
-/* ---------- existing anti-inspect ---------- */
 setInterval(function () {
   const threshold = 160;
   if (
@@ -376,10 +381,9 @@ setInterval(function () {
 }, 500);
 
 document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("copy", e => e.preventDefault());
+document.addEventListener("selectstart", e => e.preventDefault());
 
-/* ---------- screenshot protection ---------- */
-
-/* PrintScreen */
 document.addEventListener("keydown", function(e){
   if (e.key === "PrintScreen") {
     e.preventDefault();
@@ -388,7 +392,6 @@ document.addEventListener("keydown", function(e){
   }
 });
 
-/* blur overlay */
 function temporarilyBlur() {
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
@@ -401,13 +404,11 @@ function temporarilyBlur() {
   setTimeout(()=> overlay.remove(), 1400);
 }
 
-/* Win+Shift+S or Cmd+Shift+S */
 document.addEventListener("keydown", function(e){
   if (e.shiftKey && e.metaKey) temporarilyBlur();
   if (e.shiftKey && e.key.toLowerCase() === "s") temporarilyBlur();
 });
 
-/* Mac screenshots */
 document.addEventListener("keydown", function(e){
   if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
     e.preventDefault();
@@ -416,53 +417,14 @@ document.addEventListener("keydown", function(e){
   }
 });
 
-/* disable copy + selection */
-document.addEventListener("copy", e => e.preventDefault());
-document.addEventListener("selectstart", e => e.preventDefault());
-</script>
-
-<script>
-// ============ ANTI-INSPECT + NO DEVTOOLS ============
-
-// Detect DevTools by window resize gap
-setInterval(function () {
-  const threshold = 160;
-  if (
-    window.outerWidth - window.innerWidth > threshold ||
-    window.outerHeight - window.innerHeight > threshold
-  ) {
-    document.body.innerHTML =
-      "<h2 style='text-align:center;margin-top:40px;'>Dev Tools are not allowed 🚫</h2>";
-  }
-}, 500);
-
-// Disable right-click everywhere
-document.addEventListener("contextmenu", function(e){
-  e.preventDefault();
-});
-
-// Block common inspect keys
 document.addEventListener("keydown", function(e){
-
-  // F12
   if (e.keyCode === 123) e.preventDefault();
-
-  // Ctrl + Shift + I / J / C
   if (e.ctrlKey && e.shiftKey &&
-     ['I','J','C','i','j','c'].includes(e.key)) {
-      e.preventDefault();
-  }
-
-  // Ctrl + U (View Source)
-  if (e.ctrlKey && ['U','u'].includes(e.key)) {
-      e.preventDefault();
-  }
-
-  // Block any Ctrl+Shift combination
+     ['I','J','C','i','j','c'].includes(e.key)) e.preventDefault();
+  if (e.ctrlKey && ['U','u'].includes(e.key)) e.preventDefault();
   if (e.ctrlKey && e.shiftKey) e.preventDefault();
 });
 </script>
-
 
 </body>
 </html>
