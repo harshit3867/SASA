@@ -1,6 +1,7 @@
 name: Run Auto Download Daily
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "25 18 * * *"
 
