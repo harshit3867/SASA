@@ -5,7 +5,7 @@ DOWNLOAD_SAVE_PATH = r"C:\Users\saini\Downloads\OrderReport.zip"
 
 with sync_playwright() as p:
 
-    browser = p.chromium.launch(headless=False)
+    browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
     context = browser.new_context(storage_state="session.json")
     page = context.new_page()
 
@@ -47,3 +47,4 @@ with sync_playwright() as p:
     print(DOWNLOAD_SAVE_PATH)
 
     browser.close()
+
