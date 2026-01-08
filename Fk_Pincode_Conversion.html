@@ -221,7 +221,7 @@ for(let i=0;i<18;i++){
 
 <!-- FOOTER TICKER -->
 <div class="ticker-bar">
-  Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee
+  SASA Automation — Created by Harshit Saini | Control Tower
 </div>
 
 <script>
@@ -235,13 +235,13 @@ function detectCity(hub){
   if(hub.startsWith("ALB")||hub.startsWith("PRG")||hub.startsWith("PRAY")||hub.includes("FKL_AHD_NAI_3PL_G_02_GROCERY"))
     return "Prayagraj";
 
-  if(hub.startsWith("MRD")||hub.startsWith("MOR"))
+  if(hub.startsWith("MRD")||hub.startsWith("MOR")||hub.includes("FKL_MRD_NPR_3PL_G_02_GROCERY"))
     return "Moradabad";
 
   if(hub.startsWith("SUR")||hub.includes("FKL_SUR_KUM_3PL_G_02_GROCERY")||hub.startsWith("STR_F_FFC_SM"))
     return "Surat";
 
-  if(hub.startsWith("SIL")||hub.startsWith("SLG_F_FFC_SM"))
+  if(hub.startsWith("SIL")||hub.startsWith("SLG_F_FFC_SM")||hub.includes("FKL_SIL_PKS_3PL_G_02_GROCERY"))
     return "Siliguri";
 
   return hub;
@@ -374,4 +374,3 @@ function downloadCity(id,city){
 
 </body>
 </html>
-
