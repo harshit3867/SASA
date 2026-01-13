@@ -3,6 +3,22 @@
  * OUTPUT: 100% SAME AS YOUR CURRENT IMPLEMENTATION
  *************************************************/
 
+const DARK_STORES = [
+  "Kalyan Nagar_mnow",
+  "Basaveshwar Nagar_mnow",
+  "Jakkur_mnow",
+  "Begur_mnow",
+  "Thyagaraja Nagar_mnow",
+  "Brookfield_mnow",
+  "JP nagar_mnow",
+  "Sarjapur Road_mnow",
+  "Attapur_mnow",
+ "Gachibowli_mnow",
+   "Manikonda_mnow",
+ "Nizampet_mnow"
+];
+
+
 /* ------------------ UI HELPERS ------------------ */
 function zippeeToggleMenu() {
   document.querySelector(".nav-links")?.classList.toggle("active");
@@ -23,278 +39,596 @@ function getCurrentTimeString() {
 
 /* ------------------ DATA ------------------ */
 /* 🔴 YOUR reportData + hourPercentages REMAIN UNCHANGED */
-const reportData = [
+const reportData=[
 {
-    day: "Thursday",
-    date: "1/1/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 430,
-      "Basaveshwar Nagar_mnow": 297,
-      "Jakkur_mnow": 285,
-      "Begur_mnow": 693,
-      "Thyagaraja Nagar_mnow": 373,
-      "Brookfield_mnow": 841,
-      "JP nagar_mnow": 404,
-      "Sarjapur Road_mnow": 410
-    },
-    total: 3733
-  },
-  {
-    day: "Friday",
-    date: "1/2/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 592,
-      "Basaveshwar Nagar_mnow": 387,
-      "Jakkur_mnow": 406,
-      "Begur_mnow": 824,
-      "Thyagaraja Nagar_mnow": 450,
-      "Brookfield_mnow": 1050,
-      "JP nagar_mnow": 528,
-      "Sarjapur Road_mnow": 492
-    },
-    total: 4729
-  },
-  {
-    day: "Saturday",
-    date: "1/3/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 689,
-      "Basaveshwar Nagar_mnow": 491,
-      "Jakkur_mnow": 387,
-      "Begur_mnow": 1026,
-      "Thyagaraja Nagar_mnow": 604,
-      "Brookfield_mnow": 1234,
-      "JP nagar_mnow": 596,
-      "Sarjapur Road_mnow": 580
-    },
-    total: 5607
-  },
-  {
-    day: "Sunday",
-    date: "1/4/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 575,
-      "Basaveshwar Nagar_mnow": 427,
-      "Jakkur_mnow": 339,
-      "Begur_mnow": 888,
-      "Thyagaraja Nagar_mnow": 428,
-      "Brookfield_mnow": 1055,
-      "JP nagar_mnow": 517,
-      "Sarjapur Road_mnow": 510
-    },
-    total: 4739
-  },
-  {
-    day: "Monday",
-    date: "1/5/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 536,
-      "Basaveshwar Nagar_mnow": 324,
-      "Jakkur_mnow": 304,
-      "Begur_mnow": 778,
-      "Thyagaraja Nagar_mnow": 387,
-      "Brookfield_mnow": 863,
-      "JP nagar_mnow": 416,
-      "Sarjapur Road_mnow": 478
-    },
-    total: 4086
-  },
-   {
-    day: "Tuesday",
-    date: "1/6/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 563,
-      "Basaveshwar Nagar_mnow": 391,
-      "Jakkur_mnow": 373,
-      "Begur_mnow": 831,
-      "Thyagaraja Nagar_mnow": 461,
-      "Brookfield_mnow": 1063,
-      "JP nagar_mnow": 481,
-      "Sarjapur Road_mnow": 469
-    },
-    total: 4632
-  },
-  {
-    day: "Wednesday",
-    date: "1/7/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 406,
-      "Basaveshwar Nagar_mnow": 290,
-      "Jakkur_mnow": 235,
-      "Begur_mnow": 633,
-      "Thyagaraja Nagar_mnow": 396,
-      "Brookfield_mnow": 761,
-      "JP nagar_mnow": 369,
-      "Sarjapur Road_mnow": 333
-    },
-    total: 3423
-  },
-   {
-    day: "Thursday",
-    date: "1/8/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 402,
-      "Basaveshwar Nagar_mnow": 295,
-      "Jakkur_mnow": 266,
-      "Begur_mnow": 647,
-      "Thyagaraja Nagar_mnow": 418,
-      "Brookfield_mnow": 779,
-      "JP nagar_mnow": 376,
-      "Sarjapur Road_mnow": 383
-    },
-    total: 3566
-  },
-  {
-    day: "Friday",
-    date: "1/9/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 728,
-      "Basaveshwar Nagar_mnow": 504,
-      "Jakkur_mnow": 498,
-      "Begur_mnow": 1016,
-      "Thyagaraja Nagar_mnow": 664,
-      "Brookfield_mnow": 1283,
-      "JP nagar_mnow": 648,
-      "Sarjapur Road_mnow": 604
-    },
-    total: 5945
-  },
-  {
-    day: "Saturday",
-    date: "1/10/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 732,
-      "Basaveshwar Nagar_mnow": 554,
-      "Jakkur_mnow": 411,
-      "Begur_mnow": 1093,
-      "Thyagaraja Nagar_mnow": 770,
-      "Brookfield_mnow": 1304,
-      "JP nagar_mnow": 631,
-      "Sarjapur Road_mnow": 616
-    },
-    total: 6111
-  },
-  {
-    day: "Sunday",
-    date: "1/11/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 600,
-      "Basaveshwar Nagar_mnow": 473,
-      "Jakkur_mnow": 355,
-      "Begur_mnow": 929,
-      "Thyagaraja Nagar_mnow": 536,
-      "Brookfield_mnow": 1096,
-      "JP nagar_mnow": 538,
-      "Sarjapur Road_mnow": 533
-    },
-    total: 5060
-  },
-  {
-    day: "Monday",
-    date: "1/12/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 504,
-      "Basaveshwar Nagar_mnow": 323,
-      "Jakkur_mnow": 286,
-      "Begur_mnow": 733,
-      "Thyagaraja Nagar_mnow": 436,
-      "Brookfield_mnow": 807,
-      "JP nagar_mnow": 390,
-      "Sarjapur Road_mnow": 448
-    },
-    total: 3927
-  },
-  {
-    day: "Tuesday",
-    date: "1/13/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 553,
-      "Basaveshwar Nagar_mnow": 407,
-      "Jakkur_mnow": 366,
-      "Begur_mnow": 789,
-      "Thyagaraja Nagar_mnow": 542,
-      "Brookfield_mnow": 1036,
-      "JP nagar_mnow": 469,
-      "Sarjapur Road_mnow": 459
-    },
-    total: 4621
-  },
-  {
-    day: "Wednesday",
-    date: "1/14/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 580,
-      "Basaveshwar Nagar_mnow": 415,
-      "Jakkur_mnow": 335,
-      "Begur_mnow": 877,
-      "Thyagaraja Nagar_mnow": 567,
-      "Brookfield_mnow": 1091,
-      "JP nagar_mnow": 529,
-      "Sarjapur Road_mnow": 476
-    },
-    total: 4870
-  },
-  {
-    day: "Thursday",
-    date: "1/15/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 509,
-      "Basaveshwar Nagar_mnow": 373,
-      "Jakkur_mnow": 337,
-      "Begur_mnow": 821,
-      "Thyagaraja Nagar_mnow": 530,
-      "Brookfield_mnow": 988,
-      "JP nagar_mnow": 476,
-      "Sarjapur Road_mnow": 485
-    },
-    total: 4519
-  },
-  {
-    day: "Friday",
-    date: "1/16/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 659,
-      "Basaveshwar Nagar_mnow": 423,
-      "Jakkur_mnow": 417,
-      "Begur_mnow": 837,
-      "Thyagaraja Nagar_mnow": 556,
-      "Brookfield_mnow": 1074,
-      "JP nagar_mnow": 542,
-      "Sarjapur Road_mnow": 506
-    },
-    total: 5014
-  },
-  {
-    day: "Saturday",
-    date: "1/17/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 679,
-      "Basaveshwar Nagar_mnow": 474,
-      "Jakkur_mnow": 352,
-      "Begur_mnow": 922,
-      "Thyagaraja Nagar_mnow": 659,
-      "Brookfield_mnow": 1116,
-      "JP nagar_mnow": 540,
-      "Sarjapur Road_mnow": 527
-    },
-    total: 5269
-  },
-  {
-    day: "Sunday",
-    date: "1/18/2026",
-    stores: {
-      "Kalyan Nagar_mnow": 700,
-      "Basaveshwar Nagar_mnow": 473,
-      "Jakkur_mnow": 354,
-      "Begur_mnow": 914,
-      "Thyagaraja Nagar_mnow": 535,
-      "Brookfield_mnow": 1094,
-      "JP nagar_mnow": 537,
-      "Sarjapur Road_mnow": 532
-    },
-    total: 5139
-  }
- 
+  day: "Thursday",
+  date: "1/1/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 279,
+    "Begur_mnow": 651,
+    "Brookfield_mnow": 789,
+    "Jakkur_mnow": 268,
+    "JP nagar_mnow": 380,
+    "Kalyan Nagar_mnow": 405,
+    "Sarjapur Road_mnow": 386,
+    "Thyagaraja Nagar_mnow": 352,
+    "Attapur_mnow": 138,
+    "Gachibowli_mnow": 352,
+    "Manikonda_mnow": 208,
+    "Nizampet_mnow": 187
+},
+  total: 4395
+},
+{
+  day: "Friday",
+  date: "1/2/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 368,
+    "Begur_mnow": 784,
+    "Brookfield_mnow": 998,
+    "Jakkur_mnow": 386,
+    "JP nagar_mnow": 503,
+    "Kalyan Nagar_mnow": 563,
+    "Sarjapur Road_mnow": 468,
+    "Thyagaraja Nagar_mnow": 428,
+    "Attapur_mnow": 163,
+    "Gachibowli_mnow": 424,
+    "Manikonda_mnow": 254,
+    "Nizampet_mnow": 213
+},
+  total: 5552
+},
+{
+  day: "Saturday",
+  date: "1/3/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 484,
+    "Begur_mnow": 1009,
+    "Brookfield_mnow": 1214,
+    "Jakkur_mnow": 380,
+    "JP nagar_mnow": 586,
+    "Kalyan Nagar_mnow": 677,
+    "Sarjapur Road_mnow": 571,
+    "Thyagaraja Nagar_mnow": 595,
+    "Attapur_mnow": 177,
+    "Gachibowli_mnow": 485,
+    "Manikonda_mnow": 303,
+    "Nizampet_mnow": 246
+},
+  total: 6727
+},
+{
+  day: "Sunday",
+  date: "1/4/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 420,
+    "Begur_mnow": 874,
+    "Brookfield_mnow": 1038,
+    "Jakkur_mnow": 334,
+    "JP nagar_mnow": 508,
+    "Kalyan Nagar_mnow": 566,
+    "Sarjapur Road_mnow": 503,
+    "Thyagaraja Nagar_mnow": 421,
+    "Attapur_mnow": 200,
+    "Gachibowli_mnow": 502,
+    "Manikonda_mnow": 284,
+    "Nizampet_mnow": 236
+},
+  total: 5886
+},
+{
+  day: "Monday",
+  date: "1/5/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 319,
+    "Begur_mnow": 766,
+    "Brookfield_mnow": 849,
+    "Jakkur_mnow": 299,
+    "JP nagar_mnow": 409,
+    "Kalyan Nagar_mnow": 527,
+    "Sarjapur Road_mnow": 470,
+    "Thyagaraja Nagar_mnow": 380,
+    "Attapur_mnow": 158,
+    "Gachibowli_mnow": 336,
+    "Manikonda_mnow": 237,
+    "Nizampet_mnow": 181
+},
+  total: 4931
+},
+{
+  day: "Tuesday",
+  date: "1/6/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 391,
+    "Begur_mnow": 831,
+    "Brookfield_mnow": 1063,
+    "Jakkur_mnow": 373,
+    "JP nagar_mnow": 481,
+    "Kalyan Nagar_mnow": 563,
+    "Sarjapur Road_mnow": 469,
+    "Thyagaraja Nagar_mnow": 461,
+    "Attapur_mnow": 205,
+    "Gachibowli_mnow": 485,
+    "Manikonda_mnow": 287,
+    "Nizampet_mnow": 266
+},
+  total: 5875
+},
+{
+  day: "Wednesday",
+  date: "1/7/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 290,
+    "Begur_mnow": 633,
+    "Brookfield_mnow": 761,
+    "Jakkur_mnow": 235,
+    "JP nagar_mnow": 369,
+    "Kalyan Nagar_mnow": 406,
+    "Sarjapur Road_mnow": 333,
+    "Thyagaraja Nagar_mnow": 396,
+    "Attapur_mnow": 211,
+    "Gachibowli_mnow": 390,
+    "Manikonda_mnow": 239,
+    "Nizampet_mnow": 220
+},
+  total: 4483
+},
+{
+  day: "Thursday",
+  date: "1/8/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 295,
+    "Begur_mnow": 647,
+    "Brookfield_mnow": 779,
+    "Jakkur_mnow": 266,
+    "JP nagar_mnow": 376,
+    "Kalyan Nagar_mnow": 402,
+    "Sarjapur Road_mnow": 383,
+    "Thyagaraja Nagar_mnow": 418,
+    "Attapur_mnow": 184,
+    "Gachibowli_mnow": 415,
+    "Manikonda_mnow": 244,
+    "Nizampet_mnow": 242
+},
+  total: 4651
+},
+{
+  day: "Friday",
+  date: "1/9/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 504,
+    "Begur_mnow": 1016,
+    "Brookfield_mnow": 1283,
+    "Jakkur_mnow": 498,
+    "JP nagar_mnow": 648,
+    "Kalyan Nagar_mnow": 728,
+    "Sarjapur Road_mnow": 604,
+    "Thyagaraja Nagar_mnow": 664,
+    "Attapur_mnow": 304,
+    "Gachibowli_mnow": 691,
+    "Manikonda_mnow": 414,
+    "Nizampet_mnow": 384
+},
+  total: 7738
+},
+{
+  day: "Saturday",
+  date: "1/10/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 554,
+    "Begur_mnow": 1093,
+    "Brookfield_mnow": 1304,
+    "Jakkur_mnow": 411,
+    "JP nagar_mnow": 631,
+    "Kalyan Nagar_mnow": 732,
+    "Sarjapur Road_mnow": 616,
+    "Thyagaraja Nagar_mnow": 770,
+    "Attapur_mnow": 257,
+    "Gachibowli_mnow": 619,
+    "Manikonda_mnow": 389,
+    "Nizampet_mnow": 347
+},
+  total: 7723
+},
+{
+  day: "Sunday",
+  date: "1/11/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 473,
+    "Begur_mnow": 929,
+    "Brookfield_mnow": 1096,
+    "Jakkur_mnow": 355,
+    "JP nagar_mnow": 538,
+    "Kalyan Nagar_mnow": 600,
+    "Sarjapur Road_mnow": 533,
+    "Thyagaraja Nagar_mnow": 536,
+    "Attapur_mnow": 274,
+    "Gachibowli_mnow": 601,
+    "Manikonda_mnow": 340,
+    "Nizampet_mnow": 312
+},
+  total: 6587
+},
+{
+  day: "Monday",
+  date: "1/12/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 323,
+    "Begur_mnow": 733,
+    "Brookfield_mnow": 807,
+    "Jakkur_mnow": 286,
+    "JP nagar_mnow": 390,
+    "Kalyan Nagar_mnow": 504,
+    "Sarjapur Road_mnow": 448,
+    "Thyagaraja Nagar_mnow": 436,
+    "Attapur_mnow": 194,
+    "Gachibowli_mnow": 364,
+    "Manikonda_mnow": 257,
+    "Nizampet_mnow": 217
+},
+  total: 4959
+},
+{
+  day: "Tuesday",
+  date: "1/13/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 407,
+    "Begur_mnow": 789,
+    "Brookfield_mnow": 1036,
+    "Jakkur_mnow": 366,
+    "JP nagar_mnow": 469,
+    "Kalyan Nagar_mnow": 553,
+    "Sarjapur Road_mnow": 459,
+    "Thyagaraja Nagar_mnow": 542,
+    "Attapur_mnow": 258,
+    "Gachibowli_mnow": 537,
+    "Manikonda_mnow": 317,
+    "Nizampet_mnow": 325
+},
+  total: 6058
+},
+{
+  day: "Wednesday",
+  date: "1/14/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 415,
+    "Begur_mnow": 877,
+    "Brookfield_mnow": 1091,
+    "Jakkur_mnow": 335,
+    "JP nagar_mnow": 529,
+    "Kalyan Nagar_mnow": 580,
+    "Sarjapur Road_mnow": 476,
+    "Thyagaraja Nagar_mnow": 567,
+    "Attapur_mnow": 289,
+    "Gachibowli_mnow": 533,
+    "Manikonda_mnow": 327,
+    "Nizampet_mnow": 302
+},
+  total: 6321
+},
+{
+  day: "Thursday",
+  date: "1/15/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 373,
+    "Begur_mnow": 821,
+    "Brookfield_mnow": 988,
+    "Jakkur_mnow": 337,
+    "JP nagar_mnow": 476,
+    "Kalyan Nagar_mnow": 509,
+    "Sarjapur Road_mnow": 485,
+    "Thyagaraja Nagar_mnow": 530,
+    "Attapur_mnow": 223,
+    "Gachibowli_mnow": 503,
+    "Manikonda_mnow": 295,
+    "Nizampet_mnow": 294
+},
+  total: 5834
+},
+{
+  day: "Friday",
+  date: "1/16/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 423,
+    "Begur_mnow": 837,
+    "Brookfield_mnow": 1074,
+    "Jakkur_mnow": 417,
+    "JP nagar_mnow": 542,
+    "Kalyan Nagar_mnow": 659,
+    "Sarjapur Road_mnow": 506,
+    "Thyagaraja Nagar_mnow": 556,
+    "Attapur_mnow": 242,
+    "Gachibowli_mnow": 550,
+    "Manikonda_mnow": 331,
+    "Nizampet_mnow": 306
+},
+  total: 6443
+},
+{
+  day: "Saturday",
+  date: "1/17/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 474,
+    "Begur_mnow": 922,
+    "Brookfield_mnow": 1116,
+    "Jakkur_mnow": 352,
+    "JP nagar_mnow": 540,
+    "Kalyan Nagar_mnow": 679,
+    "Sarjapur Road_mnow": 527,
+    "Thyagaraja Nagar_mnow": 659,
+    "Attapur_mnow": 211,
+    "Gachibowli_mnow": 506,
+    "Manikonda_mnow": 317,
+    "Nizampet_mnow": 284
+},
+  total: 6587
+},
+{
+  day: "Sunday",
+  date: "1/18/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 473,
+    "Begur_mnow": 914,
+    "Brookfield_mnow": 1094,
+    "Jakkur_mnow": 354,
+    "JP nagar_mnow": 537,
+    "Kalyan Nagar_mnow": 700,
+    "Sarjapur Road_mnow": 532,
+    "Thyagaraja Nagar_mnow": 535,
+    "Attapur_mnow": 274,
+    "Gachibowli_mnow": 602,
+    "Manikonda_mnow": 340,
+    "Nizampet_mnow": 313
+},
+  total: 6668
+},
+{
+  day: "Monday",
+  date: "1/19/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 238,
+    "Begur_mnow": 529,
+    "Brookfield_mnow": 591,
+    "Jakkur_mnow": 210,
+    "JP nagar_mnow": 286,
+    "Kalyan Nagar_mnow": 431,
+    "Sarjapur Road_mnow": 330,
+    "Thyagaraja Nagar_mnow": 319,
+    "Attapur_mnow": 142,
+    "Gachibowli_mnow": 267,
+    "Manikonda_mnow": 187,
+    "Nizampet_mnow": 159
+},
+  total: 3689
+},
+{
+  day: "Tuesday",
+  date: "1/20/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 272,
+    "Begur_mnow": 537,
+    "Brookfield_mnow": 692,
+    "Jakkur_mnow": 244,
+    "JP nagar_mnow": 314,
+    "Kalyan Nagar_mnow": 461,
+    "Sarjapur Road_mnow": 307,
+    "Thyagaraja Nagar_mnow": 362,
+    "Attapur_mnow": 173,
+    "Gachibowli_mnow": 358,
+    "Manikonda_mnow": 212,
+    "Nizampet_mnow": 217
+},
+  total: 4149
+},
+{
+  day: "Wednesday",
+  date: "1/21/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 365,
+    "Begur_mnow": 785,
+    "Brookfield_mnow": 958,
+    "Jakkur_mnow": 295,
+    "JP nagar_mnow": 465,
+    "Kalyan Nagar_mnow": 638,
+    "Sarjapur Road_mnow": 418,
+    "Thyagaraja Nagar_mnow": 499,
+    "Attapur_mnow": 249,
+    "Gachibowli_mnow": 459,
+    "Manikonda_mnow": 281,
+    "Nizampet_mnow": 260
+},
+  total: 5672
+},
+{
+  day: "Thursday",
+  date: "1/22/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 367,
+    "Begur_mnow": 795,
+    "Brookfield_mnow": 972,
+    "Jakkur_mnow": 331,
+    "JP nagar_mnow": 468,
+    "Kalyan Nagar_mnow": 626,
+    "Sarjapur Road_mnow": 478,
+    "Thyagaraja Nagar_mnow": 522,
+    "Attapur_mnow": 215,
+    "Gachibowli_mnow": 484,
+    "Manikonda_mnow": 285,
+    "Nizampet_mnow": 283
+},
+  total: 5826
+},
+{
+  day: "Friday",
+  date: "1/23/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 401,
+    "Begur_mnow": 781,
+    "Brookfield_mnow": 1019,
+    "Jakkur_mnow": 395,
+    "JP nagar_mnow": 514,
+    "Kalyan Nagar_mnow": 761,
+    "Sarjapur Road_mnow": 481,
+    "Thyagaraja Nagar_mnow": 527,
+    "Attapur_mnow": 225,
+    "Gachibowli_mnow": 511,
+    "Manikonda_mnow": 307,
+    "Nizampet_mnow": 284
+},
+  total: 6206
+},
+{
+  day: "Saturday",
+  date: "1/24/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 430,
+    "Begur_mnow": 822,
+    "Brookfield_mnow": 1014,
+    "Jakkur_mnow": 320,
+    "JP nagar_mnow": 490,
+    "Kalyan Nagar_mnow": 750,
+    "Sarjapur Road_mnow": 479,
+    "Thyagaraja Nagar_mnow": 599,
+    "Attapur_mnow": 187,
+    "Gachibowli_mnow": 449,
+    "Manikonda_mnow": 281,
+    "Nizampet_mnow": 252
+},
+  total: 6073
+},
+{
+  day: "Sunday",
+  date: "1/25/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 398,
+    "Begur_mnow": 744,
+    "Brookfield_mnow": 921,
+    "Jakkur_mnow": 298,
+    "JP nagar_mnow": 451,
+    "Kalyan Nagar_mnow": 656,
+    "Sarjapur Road_mnow": 447,
+    "Thyagaraja Nagar_mnow": 450,
+    "Attapur_mnow": 225,
+    "Gachibowli_mnow": 494,
+    "Manikonda_mnow": 279,
+    "Nizampet_mnow": 256
+},
+  total: 5619
+},
+{
+  day: "Monday",
+  date: "1/26/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 304,
+    "Begur_mnow": 666,
+    "Brookfield_mnow": 758,
+    "Jakkur_mnow": 269,
+    "JP nagar_mnow": 367,
+    "Kalyan Nagar_mnow": 623,
+    "Sarjapur Road_mnow": 422,
+    "Thyagaraja Nagar_mnow": 409,
+    "Attapur_mnow": 179,
+    "Gachibowli_mnow": 334,
+    "Manikonda_mnow": 235,
+    "Nizampet_mnow": 200
+},
+  total: 4766
+},
+{
+  day: "Tuesday",
+  date: "1/27/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 312,
+    "Begur_mnow": 614,
+    "Brookfield_mnow": 792,
+    "Jakkur_mnow": 280,
+    "JP nagar_mnow": 359,
+    "Kalyan Nagar_mnow": 563,
+    "Sarjapur Road_mnow": 352,
+    "Thyagaraja Nagar_mnow": 414,
+    "Attapur_mnow": 194,
+    "Gachibowli_mnow": 402,
+    "Manikonda_mnow": 238,
+    "Nizampet_mnow": 243
+},
+  total: 4763
+},
+{
+  day: "Wednesday",
+  date: "1/28/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 333,
+    "Begur_mnow": 715,
+    "Brookfield_mnow": 873,
+    "Jakkur_mnow": 269,
+    "JP nagar_mnow": 423,
+    "Kalyan Nagar_mnow": 620,
+    "Sarjapur Road_mnow": 382,
+    "Thyagaraja Nagar_mnow": 455,
+    "Attapur_mnow": 226,
+    "Gachibowli_mnow": 418,
+    "Manikonda_mnow": 257,
+    "Nizampet_mnow": 237
+},
+  total: 5208
+},
+{
+  day: "Thursday",
+  date: "1/29/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 333,
+    "Begur_mnow": 721,
+    "Brookfield_mnow": 882,
+    "Jakkur_mnow": 301,
+    "JP nagar_mnow": 425,
+    "Kalyan Nagar_mnow": 606,
+    "Sarjapur Road_mnow": 433,
+    "Thyagaraja Nagar_mnow": 472,
+    "Attapur_mnow": 195,
+    "Gachibowli_mnow": 439,
+    "Manikonda_mnow": 258,
+    "Nizampet_mnow": 257
+},
+  total: 5322
+},
+{
+  day: "Friday",
+  date: "1/30/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 366,
+    "Begur_mnow": 725,
+    "Brookfield_mnow": 931,
+    "Jakkur_mnow": 361,
+    "JP nagar_mnow": 469,
+    "Kalyan Nagar_mnow": 704,
+    "Sarjapur Road_mnow": 438,
+    "Thyagaraja Nagar_mnow": 481,
+    "Attapur_mnow": 206,
+    "Gachibowli_mnow": 467,
+    "Manikonda_mnow": 280,
+    "Nizampet_mnow": 260
+},
+  total: 5688
+},
+{
+  day: "Saturday",
+  date: "1/31/2026",
+  stores: {
+    "Basaveshwar Nagar_mnow": 493,
+    "Begur_mnow": 957,
+    "Brookfield_mnow": 1159,
+    "Jakkur_mnow": 366,
+    "JP nagar_mnow": 561,
+    "Kalyan Nagar_mnow": 868,
+    "Sarjapur Road_mnow": 548,
+    "Thyagaraja Nagar_mnow": 684,
+    "Attapur_mnow": 215,
+    "Gachibowli_mnow": 515,
+    "Manikonda_mnow": 322,
+    "Nizampet_mnow": 288
+},
+  total: 6976
+}
 ];
 
 // we add the new hour percentages data here
@@ -331,6 +665,24 @@ const AppState = {
 
 /* ------------------ FINAL TABLE LOGIC ------------------ */
 function generateFinalTable() {
+  const GROUP_1 = [
+  "Kalyan Nagar_mnow",
+  "Basaveshwar Nagar_mnow",
+  "Jakkur_mnow",
+  "Begur_mnow",
+  "Thyagaraja Nagar_mnow",
+  "Brookfield_mnow",
+  "JP nagar_mnow",
+  "Sarjapur Road_mnow"
+];
+
+const GROUP_2 = [
+  "Attapur_mnow",
+  "Gachibowli_mnow",
+  "Manikonda_mnow",
+  "Nizampet_mnow"
+];
+
   const projectionTable = document.getElementById("reportTable");
   const summaryTable = document.getElementById("summaryTable");
   const output = document.getElementById("output");
@@ -343,92 +695,281 @@ function generateFinalTable() {
   const projRows = projectionTable.querySelectorAll("tbody tr");
   const sumRows = summaryTable.querySelectorAll("tbody tr");
 
-  let finalHTML = `
-    <h2 style="margin:10px 0;">📊 Final Table</h2>
-    <table class="table table-bordered">
-      <thead style="background:#ffc107;">
+  // STEP 1: totals
+  let totals1 = {
+  projectedFull: 0,
+  projectedTill: 0,
+  projectedBuffer: 0,
+  totalOrders: 0,
+  delivered: 0,
+  deepPainCount: 0,
+  additionalOrders: 0,
+  actualRiders: 0,
+  idleRider: 0
+};
+
+let totals2 = {
+  projectedFull: 0,
+  projectedTill: 0,
+  projectedBuffer: 0,
+  totalOrders: 0,
+  delivered: 0,
+  deepPainCount: 0,
+  additionalOrders: 0,
+  actualRiders: 0,
+  idleRider: 0
+};
+
+let cancelledPctArr1 = [], cancelledPctArr2 = [];
+let deepPainPctArr1 = [], deepPainPctArr2 = [];
+let orderAttainmentArr1 = [], orderAttainmentArr2 = [];
+let actualDeepPainArr1 = [], actualDeepPainArr2 = [];
+let bfArr1 = [], bfArr2 = [];
+
+/// Watermark
+const watermarkRowHTML = `
+<tr>
+  <td colspan="15"
+      style="
+        text-align:center;
+        font-size:12px;
+        font-style:italic;
+        color:#666;
+        padding:8px;
+        background:#f9f9f9;
+      ">
+    Powered by <b>SASA Automation</b> | Harshit Saini – Data Analyst, Zippee
+  </td>
+</tr>
+`;
+
+
+// STEP 2: loop store rows only (CORRECT VERSION)
+
+// 🔹 build projection row map ONCE
+const projRowMap = {};
+projRows.forEach(row => {
+  const name = row.querySelector("td")?.textContent.trim();
+  if (name && name.toLowerCase() !== "total") {
+    projRowMap[name] = row.querySelectorAll("td");
+  }
+});
+
+// 🔹 now loop summary rows
+let table1Rows = "";
+let table2Rows = "";
+for (let i = 0; i < sumRows.length; i++) {
+  const sCells = sumRows[i].querySelectorAll("td");
+  const store = sCells[0].textContent.trim();
+
+  // skip summary total row
+  if (store.toLowerCase() === "total") continue;
+
+  // get matching projection row by STORE NAME
+const pCells = projRowMap[store] || [];
+
+  // ---- values from projection table ----
+  const projectedFull = Number(pCells[1].textContent) || 0;
+  const projectedTill = Number(pCells[2].textContent) || 0;
+  const projectedBuffer = Number(pCells[3].textContent) || 0;
+
+  // ---- values from summary table ----
+  const totalOrders = Number(sCells[1].textContent) || 0;
+  const cancelledPct =
+  totalOrders > 0 ? parseFloat(sCells[3].textContent) || 0 : 0;
+  const delivered = Number(sCells[4].textContent) || 0;
+  const deepPainPct =
+  delivered > 0 ? parseFloat(sCells[7].textContent) || 0 : 0;
+
+  const actualRiders = Number(sCells[8].querySelector("input")?.value) || 0;
+  const idleRider = Number(sCells[9].querySelector("input")?.value) || 0;
+  const bf = Number(sCells[10].querySelector("input")?.value) || 0;
+
+  // ---- calculations ----
+  const orderAttainment =
+    projectedTill > 0
+      ? ((totalOrders / projectedTill) * 100).toFixed(2)
+      : "0.00";
+
+  const deepPainCount = ((totalOrders * deepPainPct) / 100).toFixed(2);
+  const additionalOrders = Math.max(totalOrders - projectedBuffer, 0);
+
+  const correctedDeepPain = deepPainCount - additionalOrders;
+  const actualDeepPain =
+    totalOrders > 0
+      ? Math.max((correctedDeepPain / totalOrders) * 100, 0).toFixed(2)
+      : "0.00";
+
+
+  // ---- render row ----
+ const rowHTML = `
+  <tr>
+    <td>${store}</td>
+    <td>${projectedFull}</td>
+    <td>${projectedTill}</td>
+    <td>${projectedBuffer}</td>
+    <td>${totalOrders}</td>
+    <td>${cancelledPct.toFixed(2)}%</td>
+    <td>${delivered}</td>
+    <td>${deepPainPct.toFixed(2)}%</td>
+    <td>${actualRiders}</td>
+    <td>${idleRider}</td>
+    <td>${bf}</td>
+    <td>${orderAttainment}%</td>
+    <td>${deepPainCount}</td>
+    <td>${additionalOrders}</td>
+    <td>${actualDeepPain}</td>
+  </tr>
+`;
+
+if (GROUP_1.includes(store)) {
+  table1Rows += rowHTML;
+
+  totals1.projectedFull += projectedFull;
+  totals1.projectedTill += projectedTill;
+  totals1.projectedBuffer += projectedBuffer;
+  totals1.totalOrders += totalOrders;
+  totals1.delivered += delivered;
+  totals1.deepPainCount += Number(deepPainCount);
+  totals1.additionalOrders += additionalOrders;
+  totals1.actualRiders += actualRiders;
+  totals1.idleRider += idleRider;
+
+  cancelledPctArr1.push(cancelledPct);
+  deepPainPctArr1.push(deepPainPct);
+  orderAttainmentArr1.push(parseFloat(orderAttainment));
+  actualDeepPainArr1.push(parseFloat(actualDeepPain));
+  bfArr1.push(bf);
+
+} else if (GROUP_2.includes(store)) {
+  table2Rows += rowHTML;
+
+  totals2.projectedFull += projectedFull;
+  totals2.projectedTill += projectedTill;
+  totals2.projectedBuffer += projectedBuffer;
+  totals2.totalOrders += totalOrders;
+  totals2.delivered += delivered;
+  totals2.deepPainCount += Number(deepPainCount);
+  totals2.additionalOrders += additionalOrders;
+  totals2.actualRiders += actualRiders;
+  totals2.idleRider += idleRider;
+
+  cancelledPctArr2.push(cancelledPct);
+  deepPainPctArr2.push(deepPainPct);
+  orderAttainmentArr2.push(parseFloat(orderAttainment));
+  actualDeepPainArr2.push(parseFloat(actualDeepPain));
+  bfArr2.push(bf);
+}
+}
+
+// build TOTAL row html
+const totalRowHTML1 = `
+<tr class="total-row">
+  <td>Total</td>
+  <td>${totals1.projectedFull}</td>
+  <td>${totals1.projectedTill}</td>
+  <td>${totals1.projectedBuffer}</td>
+  <td>${totals1.totalOrders}</td>
+  <td>${(cancelledPctArr1.reduce((a,b)=>a+b,0)/cancelledPctArr1.length || 0).toFixed(2)}%</td>
+  <td>${totals1.delivered}</td>
+  <td>${(deepPainPctArr1.reduce((a,b)=>a+b,0)/deepPainPctArr1.length || 0).toFixed(2)}%</td>
+  <td>${totals1.actualRiders}</td>
+  <td>${totals1.idleRider}</td>
+  <td>${(bfArr1.reduce((a,b)=>a+b,0)/bfArr1.length || 0).toFixed(2)}</td>
+  <td>${(orderAttainmentArr1.reduce((a,b)=>a+b,0)/orderAttainmentArr1.length || 0).toFixed(2)}%</td>
+  <td>${totals1.deepPainCount.toFixed(2)}</td>
+  <td>${totals1.additionalOrders}</td>
+  <td>${(actualDeepPainArr1.reduce((a,b)=>a+b,0)/actualDeepPainArr1.length || 0).toFixed(2)}%</td>
+</tr>`;
+const totalRowHTML2 = `
+<tr class="total-row">
+  <td>Total</td>
+  <td>${totals2.projectedFull}</td>
+  <td>${totals2.projectedTill}</td>
+  <td>${totals2.projectedBuffer}</td>
+  <td>${totals2.totalOrders}</td>
+  <td>${(cancelledPctArr2.reduce((a,b)=>a+b,0)/cancelledPctArr2.length || 0).toFixed(2)}%</td>
+  <td>${totals2.delivered}</td>
+  <td>${(deepPainPctArr2.reduce((a,b)=>a+b,0)/deepPainPctArr2.length || 0).toFixed(2)}%</td>
+  <td>${totals2.actualRiders}</td>
+  <td>${totals2.idleRider}</td>
+  <td>${(bfArr2.reduce((a,b)=>a+b,0)/bfArr2.length || 0).toFixed(2)}</td>
+  <td>${(orderAttainmentArr2.reduce((a,b)=>a+b,0)/orderAttainmentArr2.length || 0).toFixed(2)}%</td>
+  <td>${totals2.deepPainCount.toFixed(2)}</td>
+  <td>${totals2.additionalOrders}</td>
+  <td>${(actualDeepPainArr2.reduce((a,b)=>a+b,0)/actualDeepPainArr2.length || 0).toFixed(2)}%</td>
+</tr>`;
+
+
+// -------- STEP 4: RENDER TWO TABLES --------
+output.innerHTML = `
+  <h3 style="margin-top:20px;">📍 Bangalore Dark Stores</h3>
+  <button onclick="downloadTableImage('blrTable','Bangalore_Dark_Stores')" 
+          style="margin-bottom:10px;">
+    ⬇ Download Bangalore Table
+  </button>
+
+  <div id="blrTable">
+    <table class="table table-bordered glass-table">
+      <thead style="background:#003f8c; color:white;">
         <tr>
-          <th>Store Name</th>
-          <th>Projected Orders</th>
-          <th>Projected Orders | Till Hour</th>
-          <th>Projected Orders | Buffer</th>
-          <th>Total Orders</th>
-          <th>Cancelled %</th>
-          <th>Delivered Orders</th>
-          <th>Deep Pain %</th>
-          <th>Actual Riders</th>
-          <th>Idle Rider</th>
-          <th>BF</th>
-          <th>Order Attainment %</th>
-          <th>Deep Pain (Order Count)</th>
-          <th>Additional Orders</th>
-          <th>@Actual Deep_Pain</th>
+          <th>Store</th><th>Projected</th><th>Till Hour</th><th>Buffer</th>
+          <th>Total</th><th>Cancelled %</th><th>Delivered</th><th>Deep Pain %</th>
+          <th>Actual Riders</th><th>Idle Rider</th><th>BF</th>
+          <th>Order Attainment %</th><th>DP Count</th><th>Additional</th><th>@Actual DP</th>
         </tr>
       </thead>
       <tbody>
-  `;
+        ${table1Rows}
+        ${totalRowHTML1}
+        ${watermarkRowHTML}
+      </tbody>
+    </table>
+  </div>
 
-  for (let i = 0; i < sumRows.length; i++) {
-    const sCells = sumRows[i].querySelectorAll("td");
-    const pCells = projRows[i].querySelectorAll("td");
+  <h3 style="margin-top:30px;">📍 Hyderabad Dark Stores</h3>
+  <button onclick="downloadTableImage('hydTable','Hyderabad_Dark_Stores')" 
+          style="margin-bottom:10px;">
+    ⬇ Download Hyderabad Table
+  </button>
 
-    const store = sCells[0].textContent.trim();
+  <div id="hydTable">
+    <table class="table table-bordered glass-table">
+      <thead style="background:#003f8c; color:white;">
+        <tr>
+          <th>Store</th><th>Projected</th><th>Till Hour</th><th>Buffer</th>
+          <th>Total</th><th>Cancelled %</th><th>Delivered</th><th>Deep Pain %</th>
+          <th>Actual Riders</th><th>Idle Rider</th><th>BF</th>
+          <th>Order Attainment %</th><th>DP Count</th><th>Additional</th><th>@Actual DP</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${table2Rows}
+        ${totalRowHTML2}
+        ${watermarkRowHTML}
+      </tbody>
+    </table>
+  </div>
+`;
 
-    const projectedFull = Number(pCells[1].textContent) || 0;
-    const projectedTill = Number(pCells[2].textContent) || 0;
-    const projectedBuffer = Number(pCells[3].textContent) || 0;
 
-    const totalOrders = Number(sCells[1].textContent) || 0;
-    const cancelledPct = sCells[3].textContent;
-    const delivered = Number(sCells[4].textContent) || 0;
-    const deepPainPctStr = sCells[7].textContent.replace("%", "");
-    const deepPainPct = Number(deepPainPctStr) || 0;
-
-    const actualRiders = Number(sCells[8].querySelector("input")?.value) || 0;
-    const idleRider = Number(sCells[9].querySelector("input")?.value) || 0;
-    const bf = Number(sCells[10].querySelector("input")?.value) || 0;
-
-    // ---- CALCULATIONS (OLD LOGIC) ----
-    const orderAttainment =
-      projectedTill > 0 ? ((totalOrders / projectedTill) * 100).toFixed(2) : "0.00";
-
-    const deepPainCount = ((totalOrders * deepPainPct) / 100).toFixed(2);
-
-    const additionalOrders =
-      totalOrders > projectedBuffer ? totalOrders - projectedBuffer : 0;
-
-    const correctedDeepPain = deepPainCount - additionalOrders;
-    const actualDeepPain =
-      totalOrders > 0
-        ? Math.max((correctedDeepPain / totalOrders) * 100, 0).toFixed(2)
-        : "0.00";
-
-    finalHTML += `
-      <tr>
-        <td>${store}</td>
-        <td>${projectedFull}</td>
-        <td>${projectedTill}</td>
-        <td>${projectedBuffer}</td>
-        <td>${totalOrders}</td>
-        <td>${cancelledPct}</td>
-        <td>${delivered}</td>
-        <td>${deepPainPct}%</td>
-        <td>${actualRiders}</td>
-        <td>${idleRider}</td>
-        <td>${bf}</td>
-        <td>${orderAttainment}%</td>
-        <td>${deepPainCount}</td>
-        <td>${additionalOrders}</td>
-        <td>${actualDeepPain}</td>
-      </tr>
-    `;
-  }
-
-  finalHTML += `</tbody></table>`;
-  output.innerHTML = finalHTML;
 }
+
 document.getElementById("finalTableBtn")?.addEventListener("click", generateFinalTable);
 
+
+///
+function downloadTableImage(elementId, fileName) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  html2canvas(element, { scale: 2 }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = fileName + ".png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
 
 /* ------------------ HOUR % LOGIC ------------------ */
 function getHourPercentageFor(day, hour) {
@@ -446,7 +987,7 @@ function generateSummaryTable() {
 
   const today = getTodayDateString();
   const data = reportData.find(d => d.date === today) || reportData.at(-1);
-  const stores = Object.keys(data.stores);
+  const stores = DARK_STORES;
 
   const now = new Date();
   const hourRow = getHourPercentageFor(getDayName(now), now.getHours());
@@ -455,7 +996,7 @@ function generateSummaryTable() {
   let t1=0,t2=0,t3=0;
 
   stores.forEach(s=>{
-    const full = data.stores[s];
+    const full = data.stores[s] ?? 0;
     const proj = Math.round(full * (hourRow[getDayName(now)]/100));
     const buf = Math.round(proj * 1.15);
 
@@ -500,19 +1041,17 @@ function processFile() {
 
 /* ------------------ AGGREGATION ------------------ */
 function aggregateOrders(data) {
-  const stores = [
-    "Kalyan Nagar_mnow","Basaveshwar Nagar_mnow","Jakkur_mnow",
-    "Begur_mnow","Thyagaraja Nagar_mnow","Brookfield_mnow",
-    "JP nagar_mnow","Sarjapur Road_mnow"
-  ];
+  const stores = DARK_STORES;
 
   AppState.summary = {};
+DARK_STORES.forEach(s => {
+  AppState.summary[s] = { t: 0, d: 0, a: 0, c: 0, dp: 0 };
+});
   AppState.deepPain = [];
   AppState.deepPainDetails = [];
 
   data.forEach(o=>{
     const s = o["Store Name"]?.trim();
-    if (!stores.includes(s)) return;
 
     AppState.summary[s] ??= {t:0,d:0,a:0,c:0,dp:0};
     AppState.summary[s].t++;
