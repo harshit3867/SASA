@@ -329,6 +329,107 @@ const AppState = {
   deepPainDetails: []
 };
 
+/* ------------------ FINAL TABLE LOGIC ------------------ */
+function generateFinalTable() {
+  const projectionTable = document.getElementById("reportTable");
+  const summaryTable = document.getElementById("summaryTable");
+  const output = document.getElementById("output");
+
+  if (!projectionTable || !summaryTable) {
+    alert("Projection or Summary table missing");
+    return;
+  }
+
+  const projRows = projectionTable.querySelectorAll("tbody tr");
+  const sumRows = summaryTable.querySelectorAll("tbody tr");
+
+  let finalHTML = `
+    <h2 style="margin:10px 0;">📊 Final Table</h2>
+    <table class="table table-bordered">
+      <thead style="background:#ffc107;">
+        <tr>
+          <th>Store Name</th>
+          <th>Projected Orders</th>
+          <th>Projected Orders | Till Hour</th>
+          <th>Projected Orders | Buffer</th>
+          <th>Total Orders</th>
+          <th>Cancelled %</th>
+          <th>Delivered Orders</th>
+          <th>Deep Pain %</th>
+          <th>Actual Riders</th>
+          <th>Idle Rider</th>
+          <th>BF</th>
+          <th>Order Attainment %</th>
+          <th>Deep Pain (Order Count)</th>
+          <th>Additional Orders</th>
+          <th>@Actual Deep_Pain</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  for (let i = 0; i < sumRows.length; i++) {
+    const sCells = sumRows[i].querySelectorAll("td");
+    const pCells = projRows[i].querySelectorAll("td");
+
+    const store = sCells[0].textContent.trim();
+
+    const projectedFull = Number(pCells[1].textContent) || 0;
+    const projectedTill = Number(pCells[2].textContent) || 0;
+    const projectedBuffer = Number(pCells[3].textContent) || 0;
+
+    const totalOrders = Number(sCells[1].textContent) || 0;
+    const cancelledPct = sCells[3].textContent;
+    const delivered = Number(sCells[4].textContent) || 0;
+    const deepPainPctStr = sCells[7].textContent.replace("%", "");
+    const deepPainPct = Number(deepPainPctStr) || 0;
+
+    const actualRiders = Number(sCells[8].querySelector("input")?.value) || 0;
+    const idleRider = Number(sCells[9].querySelector("input")?.value) || 0;
+    const bf = Number(sCells[10].querySelector("input")?.value) || 0;
+
+    // ---- CALCULATIONS (OLD LOGIC) ----
+    const orderAttainment =
+      projectedTill > 0 ? ((totalOrders / projectedTill) * 100).toFixed(2) : "0.00";
+
+    const deepPainCount = ((totalOrders * deepPainPct) / 100).toFixed(2);
+
+    const additionalOrders =
+      totalOrders > projectedBuffer ? totalOrders - projectedBuffer : 0;
+
+    const correctedDeepPain = deepPainCount - additionalOrders;
+    const actualDeepPain =
+      totalOrders > 0
+        ? Math.max((correctedDeepPain / totalOrders) * 100, 0).toFixed(2)
+        : "0.00";
+
+    finalHTML += `
+      <tr>
+        <td>${store}</td>
+        <td>${projectedFull}</td>
+        <td>${projectedTill}</td>
+        <td>${projectedBuffer}</td>
+        <td>${totalOrders}</td>
+        <td>${cancelledPct}</td>
+        <td>${delivered}</td>
+        <td>${deepPainPct}%</td>
+        <td>${actualRiders}</td>
+        <td>${idleRider}</td>
+        <td>${bf}</td>
+        <td>${orderAttainment}%</td>
+        <td>${deepPainCount}</td>
+        <td>${additionalOrders}</td>
+        <td>${actualDeepPain}</td>
+      </tr>
+    `;
+  }
+
+  finalHTML += `</tbody></table>`;
+  output.innerHTML = finalHTML;
+}
+document.getElementById("finalTableBtn")?.addEventListener("click", generateFinalTable);
+
+
 /* ------------------ HOUR % LOGIC ------------------ */
 function getHourPercentageFor(day, hour) {
   let idx = hour - 6;
