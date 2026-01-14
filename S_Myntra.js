@@ -811,7 +811,9 @@ const pCells = projRowMap[store] || [];
     <td>${totalOrders}</td>
     <td>${cancelledPct.toFixed(2)}%</td>
     <td>${delivered}</td>
-    <td>${deepPainPct.toFixed(2)}%</td>
+    <td class="${deepPainPct < 5 ? 'dp-green' : 'dp-red'}">
+  ${deepPainPct.toFixed(2)}%
+</td>
     <td>${actualRiders}</td>
     <td>${idleRider}</td>
     <td>${bf}</td>
@@ -872,7 +874,13 @@ const totalRowHTML1 = `
   <td>${totals1.totalOrders}</td>
   <td>${(cancelledPctArr1.reduce((a,b)=>a+b,0)/cancelledPctArr1.length || 0).toFixed(2)}%</td>
   <td>${totals1.delivered}</td>
-  <td>${(deepPainPctArr1.reduce((a,b)=>a+b,0)/deepPainPctArr1.length || 0).toFixed(2)}%</td>
+  <td class="${
+  ((deepPainPctArr1.reduce((a,b)=>a+b,0)/deepPainPctArr1.length) < 5)
+  ? 'dp-green'
+  : 'dp-red'
+}">
+  ${(deepPainPctArr1.reduce((a,b)=>a+b,0)/deepPainPctArr1.length || 0).toFixed(2)}%
+</td>
   <td>${totals1.actualRiders}</td>
   <td>${totals1.idleRider}</td>
   <td>${(bfArr1.reduce((a,b)=>a+b,0)/bfArr1.length || 0).toFixed(2)}</td>
@@ -890,7 +898,13 @@ const totalRowHTML2 = `
   <td>${totals2.totalOrders}</td>
   <td>${(cancelledPctArr2.reduce((a,b)=>a+b,0)/cancelledPctArr2.length || 0).toFixed(2)}%</td>
   <td>${totals2.delivered}</td>
-  <td>${(deepPainPctArr2.reduce((a,b)=>a+b,0)/deepPainPctArr2.length || 0).toFixed(2)}%</td>
+  <td class="${
+  ((deepPainPctArr1.reduce((a,b)=>a+b,0)/deepPainPctArr1.length) < 5)
+  ? 'dp-green'
+  : 'dp-red'
+}">
+  ${(deepPainPctArr1.reduce((a,b)=>a+b,0)/deepPainPctArr1.length || 0).toFixed(2)}%
+</td>
   <td>${totals2.actualRiders}</td>
   <td>${totals2.idleRider}</td>
   <td>${(bfArr2.reduce((a,b)=>a+b,0)/bfArr2.length || 0).toFixed(2)}</td>
