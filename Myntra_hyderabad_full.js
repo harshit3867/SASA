@@ -17,10 +17,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 405,
     "Sarjapur_Road_Mnow": 386,
     "Thyagaraja_Nagar_Mnow": 352,
-    "Attapur_Mnow": 138,
-    "Gachibowli_Mnow": 352,
-    "Manikonda_Mnow": 208,
-    "Nizampet_Mnow": 187
+    "Attapur_mnow": 138,
+    "Gachibowli_mnow": 352,
+    "Manikonda_mnow": 208,
+    "Nizampet_mnow": 187
 },
   total: 4395
 },
@@ -36,10 +36,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 563,
     "Sarjapur_Road_Mnow": 468,
     "Thyagaraja_Nagar_Mnow": 428,
-    "Attapur_Mnow": 163,
-    "Gachibowli_Mnow": 424,
-    "Manikonda_Mnow": 254,
-    "Nizampet_Mnow": 213
+    "Attapur_mnow": 163,
+    "Gachibowli_mnow": 424,
+    "Manikonda_mnow": 254,
+    "Nizampet_mnow": 213
 },
   total: 5552
 },
@@ -55,10 +55,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 677,
     "Sarjapur_Road_Mnow": 571,
     "Thyagaraja_Nagar_Mnow": 595,
-    "Attapur_Mnow": 177,
-    "Gachibowli_Mnow": 485,
-    "Manikonda_Mnow": 303,
-    "Nizampet_Mnow": 246
+    "Attapur_mnow": 177,
+    "Gachibowli_mnow": 485,
+    "Manikonda_mnow": 303,
+    "Nizampet_mnow": 246
 },
   total: 6727
 },
@@ -74,10 +74,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 566,
     "Sarjapur_Road_Mnow": 503,
     "Thyagaraja_Nagar_Mnow": 421,
-    "Attapur_Mnow": 200,
-    "Gachibowli_Mnow": 502,
-    "Manikonda_Mnow": 284,
-    "Nizampet_Mnow": 236
+    "Attapur_mnow": 200,
+    "Gachibowli_mnow": 502,
+    "Manikonda_mnow": 284,
+    "Nizampet_mnow": 236
 },
   total: 5886
 },
@@ -93,10 +93,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 527,
     "Sarjapur_Road_Mnow": 470,
     "Thyagaraja_Nagar_Mnow": 380,
-    "Attapur_Mnow": 158,
-    "Gachibowli_Mnow": 336,
-    "Manikonda_Mnow": 237,
-    "Nizampet_Mnow": 181
+    "Attapur_mnow": 158,
+    "Gachibowli_mnow": 336,
+    "Manikonda_mnow": 237,
+    "Nizampet_mnow": 181
 },
   total: 4931
 },
@@ -112,10 +112,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 563,
     "Sarjapur_Road_Mnow": 469,
     "Thyagaraja_Nagar_Mnow": 461,
-    "Attapur_Mnow": 205,
-    "Gachibowli_Mnow": 485,
-    "Manikonda_Mnow": 287,
-    "Nizampet_Mnow": 266
+    "Attapur_mnow": 205,
+    "Gachibowli_mnow": 485,
+    "Manikonda_mnow": 287,
+    "Nizampet_mnow": 266
 },
   total: 5875
 },
@@ -131,10 +131,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 406,
     "Sarjapur_Road_Mnow": 333,
     "Thyagaraja_Nagar_Mnow": 396,
-    "Attapur_Mnow": 211,
-    "Gachibowli_Mnow": 390,
-    "Manikonda_Mnow": 239,
-    "Nizampet_Mnow": 220
+    "Attapur_mnow": 211,
+    "Gachibowli_mnow": 390,
+    "Manikonda_mnow": 239,
+    "Nizampet_mnow": 220
 },
   total: 4483
 },
@@ -150,10 +150,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 402,
     "Sarjapur_Road_Mnow": 383,
     "Thyagaraja_Nagar_Mnow": 418,
-    "Attapur_Mnow": 184,
-    "Gachibowli_Mnow": 415,
-    "Manikonda_Mnow": 244,
-    "Nizampet_Mnow": 242
+    "Attapur_mnow": 184,
+    "Gachibowli_mnow": 415,
+    "Manikonda_mnow": 244,
+    "Nizampet_mnow": 242
 },
   total: 4651
 },
@@ -169,10 +169,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 728,
     "Sarjapur_Road_Mnow": 604,
     "Thyagaraja_Nagar_Mnow": 664,
-    "Attapur_Mnow": 304,
-    "Gachibowli_Mnow": 691,
-    "Manikonda_Mnow": 414,
-    "Nizampet_Mnow": 384
+    "Attapur_mnow": 304,
+    "Gachibowli_mnow": 691,
+    "Manikonda_mnow": 414,
+    "Nizampet_mnow": 384
 },
   total: 7738
 },
@@ -188,10 +188,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 732,
     "Sarjapur_Road_Mnow": 616,
     "Thyagaraja_Nagar_Mnow": 770,
-    "Attapur_Mnow": 257,
-    "Gachibowli_Mnow": 619,
-    "Manikonda_Mnow": 389,
-    "Nizampet_Mnow": 347
+    "Attapur_mnow": 257,
+    "Gachibowli_mnow": 619,
+    "Manikonda_mnow": 389,
+    "Nizampet_mnow": 347
 },
   total: 7723
 },
@@ -207,10 +207,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 600,
     "Sarjapur_Road_Mnow": 533,
     "Thyagaraja_Nagar_Mnow": 536,
-    "Attapur_Mnow": 274,
-    "Gachibowli_Mnow": 601,
-    "Manikonda_Mnow": 340,
-    "Nizampet_Mnow": 312
+    "Attapur_mnow": 274,
+    "Gachibowli_mnow": 601,
+    "Manikonda_mnow": 340,
+    "Nizampet_mnow": 312
 },
   total: 6587
 },
@@ -226,10 +226,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 504,
     "Sarjapur_Road_Mnow": 448,
     "Thyagaraja_Nagar_Mnow": 436,
-    "Attapur_Mnow": 194,
-    "Gachibowli_Mnow": 364,
-    "Manikonda_Mnow": 257,
-    "Nizampet_Mnow": 217
+    "Attapur_mnow": 194,
+    "Gachibowli_mnow": 364,
+    "Manikonda_mnow": 257,
+    "Nizampet_mnow": 217
 },
   total: 4959
 },
@@ -245,10 +245,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 553,
     "Sarjapur_Road_Mnow": 459,
     "Thyagaraja_Nagar_Mnow": 542,
-    "Attapur_Mnow": 258,
-    "Gachibowli_Mnow": 537,
-    "Manikonda_Mnow": 317,
-    "Nizampet_Mnow": 325
+    "Attapur_mnow": 258,
+    "Gachibowli_mnow": 537,
+    "Manikonda_mnow": 317,
+    "Nizampet_mnow": 325
 },
   total: 6058
 },
@@ -256,20 +256,12 @@ const reportData =[
   day: "Wednesday",
   date: "1/14/2026",
   stores: {
-    "Basaveshwar_Nagar_Mnow": 415,
-    "Begur_Mnow": 877,
-    "Brookfield_Mnow": 1091,
-    "Jakkur_Mnow": 335,
-    "JP_nagar_Mnow": 529,
-    "Kalyan_Nagar_Mnow": 580,
-    "Sarjapur_Road_Mnow": 476,
-    "Thyagaraja_Nagar_Mnow": 567,
-    "Attapur_Mnow": 289,
-    "Gachibowli_Mnow": 533,
-    "Manikonda_Mnow": 327,
-    "Nizampet_Mnow": 302
+    "Attapur_mnow": 289,
+    "Gachibowli_mnow": 533,
+    "Manikonda_mnow": 327,
+    "Nizampet_mnow": 302
 },
-  total: 6321
+  total: 1451
 },
 {
   day: "Thursday",
@@ -283,10 +275,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 509,
     "Sarjapur_Road_Mnow": 485,
     "Thyagaraja_Nagar_Mnow": 530,
-    "Attapur_Mnow": 223,
-    "Gachibowli_Mnow": 503,
-    "Manikonda_Mnow": 295,
-    "Nizampet_Mnow": 294
+    "Attapur_mnow": 223,
+    "Gachibowli_mnow": 503,
+    "Manikonda_mnow": 295,
+    "Nizampet_mnow": 294
 },
   total: 5834
 },
@@ -302,10 +294,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 659,
     "Sarjapur_Road_Mnow": 506,
     "Thyagaraja_Nagar_Mnow": 556,
-    "Attapur_Mnow": 242,
-    "Gachibowli_Mnow": 550,
-    "Manikonda_Mnow": 331,
-    "Nizampet_Mnow": 306
+    "Attapur_mnow": 242,
+    "Gachibowli_mnow": 550,
+    "Manikonda_mnow": 331,
+    "Nizampet_mnow": 306
 },
   total: 6443
 },
@@ -321,10 +313,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 679,
     "Sarjapur_Road_Mnow": 527,
     "Thyagaraja_Nagar_Mnow": 659,
-    "Attapur_Mnow": 211,
-    "Gachibowli_Mnow": 506,
-    "Manikonda_Mnow": 317,
-    "Nizampet_Mnow": 284
+    "Attapur_mnow": 211,
+    "Gachibowli_mnow": 506,
+    "Manikonda_mnow": 317,
+    "Nizampet_mnow": 284
 },
   total: 6587
 },
@@ -340,10 +332,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 700,
     "Sarjapur_Road_Mnow": 532,
     "Thyagaraja_Nagar_Mnow": 535,
-    "Attapur_Mnow": 274,
-    "Gachibowli_Mnow": 602,
-    "Manikonda_Mnow": 340,
-    "Nizampet_Mnow": 313
+    "Attapur_mnow": 274,
+    "Gachibowli_mnow": 602,
+    "Manikonda_mnow": 340,
+    "Nizampet_mnow": 313
 },
   total: 6668
 },
@@ -359,10 +351,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 431,
     "Sarjapur_Road_Mnow": 330,
     "Thyagaraja_Nagar_Mnow": 319,
-    "Attapur_Mnow": 142,
-    "Gachibowli_Mnow": 267,
-    "Manikonda_Mnow": 187,
-    "Nizampet_Mnow": 159
+    "Attapur_mnow": 142,
+    "Gachibowli_mnow": 267,
+    "Manikonda_mnow": 187,
+    "Nizampet_mnow": 159
 },
   total: 3689
 },
@@ -378,10 +370,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 461,
     "Sarjapur_Road_Mnow": 307,
     "Thyagaraja_Nagar_Mnow": 362,
-    "Attapur_Mnow": 173,
-    "Gachibowli_Mnow": 358,
-    "Manikonda_Mnow": 212,
-    "Nizampet_Mnow": 217
+    "Attapur_mnow": 173,
+    "Gachibowli_mnow": 358,
+    "Manikonda_mnow": 212,
+    "Nizampet_mnow": 217
 },
   total: 4149
 },
@@ -397,10 +389,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 638,
     "Sarjapur_Road_Mnow": 418,
     "Thyagaraja_Nagar_Mnow": 499,
-    "Attapur_Mnow": 249,
-    "Gachibowli_Mnow": 459,
-    "Manikonda_Mnow": 281,
-    "Nizampet_Mnow": 260
+    "Attapur_mnow": 249,
+    "Gachibowli_mnow": 459,
+    "Manikonda_mnow": 281,
+    "Nizampet_mnow": 260
 },
   total: 5672
 },
@@ -416,10 +408,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 626,
     "Sarjapur_Road_Mnow": 478,
     "Thyagaraja_Nagar_Mnow": 522,
-    "Attapur_Mnow": 215,
-    "Gachibowli_Mnow": 484,
-    "Manikonda_Mnow": 285,
-    "Nizampet_Mnow": 283
+    "Attapur_mnow": 215,
+    "Gachibowli_mnow": 484,
+    "Manikonda_mnow": 285,
+    "Nizampet_mnow": 283
 },
   total: 5826
 },
@@ -435,10 +427,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 761,
     "Sarjapur_Road_Mnow": 481,
     "Thyagaraja_Nagar_Mnow": 527,
-    "Attapur_Mnow": 225,
-    "Gachibowli_Mnow": 511,
-    "Manikonda_Mnow": 307,
-    "Nizampet_Mnow": 284
+    "Attapur_mnow": 225,
+    "Gachibowli_mnow": 511,
+    "Manikonda_mnow": 307,
+    "Nizampet_mnow": 284
 },
   total: 6206
 },
@@ -454,10 +446,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 750,
     "Sarjapur_Road_Mnow": 479,
     "Thyagaraja_Nagar_Mnow": 599,
-    "Attapur_Mnow": 187,
-    "Gachibowli_Mnow": 449,
-    "Manikonda_Mnow": 281,
-    "Nizampet_Mnow": 252
+    "Attapur_mnow": 187,
+    "Gachibowli_mnow": 449,
+    "Manikonda_mnow": 281,
+    "Nizampet_mnow": 252
 },
   total: 6073
 },
@@ -473,10 +465,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 656,
     "Sarjapur_Road_Mnow": 447,
     "Thyagaraja_Nagar_Mnow": 450,
-    "Attapur_Mnow": 225,
-    "Gachibowli_Mnow": 494,
-    "Manikonda_Mnow": 279,
-    "Nizampet_Mnow": 256
+    "Attapur_mnow": 225,
+    "Gachibowli_mnow": 494,
+    "Manikonda_mnow": 279,
+    "Nizampet_mnow": 256
 },
   total: 5619
 },
@@ -492,10 +484,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 623,
     "Sarjapur_Road_Mnow": 422,
     "Thyagaraja_Nagar_Mnow": 409,
-    "Attapur_Mnow": 179,
-    "Gachibowli_Mnow": 334,
-    "Manikonda_Mnow": 235,
-    "Nizampet_Mnow": 200
+    "Attapur_mnow": 179,
+    "Gachibowli_mnow": 334,
+    "Manikonda_mnow": 235,
+    "Nizampet_mnow": 200
 },
   total: 4766
 },
@@ -511,10 +503,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 563,
     "Sarjapur_Road_Mnow": 352,
     "Thyagaraja_Nagar_Mnow": 414,
-    "Attapur_Mnow": 194,
-    "Gachibowli_Mnow": 402,
-    "Manikonda_Mnow": 238,
-    "Nizampet_Mnow": 243
+    "Attapur_mnow": 194,
+    "Gachibowli_mnow": 402,
+    "Manikonda_mnow": 238,
+    "Nizampet_mnow": 243
 },
   total: 4763
 },
@@ -530,10 +522,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 620,
     "Sarjapur_Road_Mnow": 382,
     "Thyagaraja_Nagar_Mnow": 455,
-    "Attapur_Mnow": 226,
-    "Gachibowli_Mnow": 418,
-    "Manikonda_Mnow": 257,
-    "Nizampet_Mnow": 237
+    "Attapur_mnow": 226,
+    "Gachibowli_mnow": 418,
+    "Manikonda_mnow": 257,
+    "Nizampet_mnow": 237
 },
   total: 5208
 },
@@ -549,10 +541,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 606,
     "Sarjapur_Road_Mnow": 433,
     "Thyagaraja_Nagar_Mnow": 472,
-    "Attapur_Mnow": 195,
-    "Gachibowli_Mnow": 439,
-    "Manikonda_Mnow": 258,
-    "Nizampet_Mnow": 257
+    "Attapur_mnow": 195,
+    "Gachibowli_mnow": 439,
+    "Manikonda_mnow": 258,
+    "Nizampet_mnow": 257
 },
   total: 5322
 },
@@ -568,10 +560,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 704,
     "Sarjapur_Road_Mnow": 438,
     "Thyagaraja_Nagar_Mnow": 481,
-    "Attapur_Mnow": 206,
-    "Gachibowli_Mnow": 467,
-    "Manikonda_Mnow": 280,
-    "Nizampet_Mnow": 260
+    "Attapur_mnow": 206,
+    "Gachibowli_mnow": 467,
+    "Manikonda_mnow": 280,
+    "Nizampet_mnow": 260
 },
   total: 5688
 },
@@ -587,10 +579,10 @@ const reportData =[
     "Kalyan_Nagar_Mnow": 868,
     "Sarjapur_Road_Mnow": 548,
     "Thyagaraja_Nagar_Mnow": 684,
-    "Attapur_Mnow": 215,
-    "Gachibowli_Mnow": 515,
-    "Manikonda_Mnow": 322,
-    "Nizampet_Mnow": 288
+    "Attapur_mnow": 215,
+    "Gachibowli_mnow": 515,
+    "Manikonda_mnow": 322,
+    "Nizampet_mnow": 288
 },
   total: 6976
 }
