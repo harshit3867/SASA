@@ -469,8 +469,6 @@ const reportData = [
   total: 5636
 }
 ];
-
-
 // we add the new hour percentages data here
 
 const hourPercentages = [
@@ -1730,5 +1728,3 @@ function formatDate(dt) {
     const pad = n => n < 10 ? '0' + n : n;
     return `${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}-${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
-
-
