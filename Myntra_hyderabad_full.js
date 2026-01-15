@@ -267,58 +267,34 @@ const reportData =[
   day: "Thursday",
   date: "1/15/2026",
   stores: {
-    "Basaveshwar_Nagar_Mnow": 373,
-    "Begur_Mnow": 821,
-    "Brookfield_Mnow": 988,
-    "Jakkur_Mnow": 337,
-    "JP_nagar_Mnow": 476,
-    "Kalyan_Nagar_Mnow": 509,
-    "Sarjapur_Road_Mnow": 485,
-    "Thyagaraja_Nagar_Mnow": 530,
     "Attapur_mnow": 223,
     "Gachibowli_mnow": 503,
     "Manikonda_mnow": 295,
     "Nizampet_mnow": 294
 },
-  total: 5834
+  total: 1315
 },
 {
   day: "Friday",
   date: "1/16/2026",
   stores: {
-    "Basaveshwar_Nagar_Mnow": 423,
-    "Begur_Mnow": 837,
-    "Brookfield_Mnow": 1074,
-    "Jakkur_Mnow": 417,
-    "JP_nagar_Mnow": 542,
-    "Kalyan_Nagar_Mnow": 659,
-    "Sarjapur_Road_Mnow": 506,
-    "Thyagaraja_Nagar_Mnow": 556,
     "Attapur_mnow": 242,
     "Gachibowli_mnow": 550,
     "Manikonda_mnow": 331,
     "Nizampet_mnow": 306
 },
-  total: 6443
+  total: 1429
 },
 {
   day: "Saturday",
   date: "1/17/2026",
   stores: {
-    "Basaveshwar_Nagar_Mnow": 474,
-    "Begur_Mnow": 922,
-    "Brookfield_Mnow": 1116,
-    "Jakkur_Mnow": 352,
-    "JP_nagar_Mnow": 540,
-    "Kalyan_Nagar_Mnow": 679,
-    "Sarjapur_Road_Mnow": 527,
-    "Thyagaraja_Nagar_Mnow": 659,
     "Attapur_mnow": 211,
     "Gachibowli_mnow": 506,
     "Manikonda_mnow": 317,
     "Nizampet_mnow": 284
 },
-  total: 6587
+  total: 1318
 },
 {
   day: "Sunday",
@@ -1701,3 +1677,4 @@ function formatDate(dt) {
     const pad = n => n < 10 ? '0' + n : n;
     return `${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}-${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
+
