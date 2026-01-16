@@ -212,9 +212,8 @@ th,td{
                 Report: [FKG <> Zippee] Last Mile EOD Report
             </div>
             <div style="font-size:13px;">
-                Date: <span id="autoDate"></span> |
-                Time: <span id="autoTime"></span>
-            </div>
+                Date: <span id="autoDate"></span>
+                </div>
         </div>
 
         <table id="finalReportTable"></table>
@@ -491,8 +490,7 @@ add("FASR %",d=>(d.fasr/d.totalShipments*100).toFixed(2)+"%");
 function fillDateTime(){
     const d=new Date();
     document.getElementById("autoDate").innerText=d.toLocaleDateString('en-GB',{day:"2-digit",month:"short",year:"numeric"});
-    let h=d.getHours(); let am=h>=12?"PM":"AM"; h=h%12||12;
-    document.getElementById("autoTime").innerText=`${h} ${am}`;
+
 }
 
 /* -------- Download LM --------*/
