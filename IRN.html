@@ -1,436 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📋 Unique IRN Pendency Tracker</title>
-    
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IRN Pendancy Report</title>
 
-    <style>
-        /* === SHARED CORPORATE STYLES === */
-        :root {
-            --zippee-primary: #00305E; /* Deep Navy Blue */
-            --zippee-secondary: #0078D4; /* Modern Accent Blue */
-            --background-light: #f5f7fa; 
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
-            --text-dark: #2c3e50; 
-            --text-medium: #7f8c8d; 
-        }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            background: var(--background-light);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            padding-top: 80px; 
-            text-align: center;
-        }
+<style>
+:root{
+    --primary-900:#003f8c;
+    --glass-bg:rgba(255,255,255,0.16);
+    --card-shadow:0 8px 30px rgba(0,0,0,0.25);
+}
 
-        .header-main {
-            background: var(--zippee-primary); 
-            width: 100%;
-            padding: 12px 0; 
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
-            position: fixed;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+html,body{
+    margin:0;
+    padding:0;
+    font-family:"Segoe UI",Arial;
+}
 
-        .header-main h1 {
-            margin: 0;
-            font-size: 28px; 
-            font-weight: 600;
-            margin-left: 15px; 
-            letter-spacing: 0.3px;
-        }
-        
-        .header-logo {
-            height: 40px; 
-            width: auto;
-            /* Placeholder style for image since we don't have the actual file */
-            background-color: white; 
-            border-radius: 50%;
-            padding: 5px;
-        }
+body{
+    background:url('Zippee.png') center/cover fixed no-repeat;
+}
 
-        .report-container {
-            background: white;
-            padding: 30px 40px; 
-            border-radius: 8px; 
-            box-shadow: var(--card-shadow); 
-            max-width: 1400px; 
-            margin: 20px auto 40px auto; 
-            border: 1px solid #eef1f6; 
-            text-align: left; 
-        }
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.24);
+    backdrop-filter:blur(6px);
+    z-index:-1;
+}
 
-        h2 {
-            color: var(--zippee-primary);
-            font-size: 30px; 
-            font-weight: 700;
-            margin-top: 0;
-            border-bottom: 2px solid #e0e0e0; 
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .back-button {
-            display: inline-block;
-            background: #6c757d; 
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
-            margin-bottom: 20px;
-        }
-        .back-button:hover {
-            background: #5a6268;
-        }
-        
-        /* File Uploader Styles */
-        .upload-area {
-            border: 2px dashed #ccc;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-radius: 6px;
-            text-align: center;
-            background: #fcfcfc;
-        }
-        .upload-area input[type="file"] {
-            display: none;
-        }
-        .custom-file-upload {
-            border: 1px solid var(--zippee-secondary);
-            display: inline-block;
-            padding: 10px 20px;
-            cursor: pointer;
-            background: var(--zippee-secondary);
-            color: white;
-            border-radius: 4px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        .custom-file-upload:hover {
-            background: var(--zippee-primary);
-        }
-        
-        /* Status Message */
-        #status-message {
-            margin-top: 15px;
-            font-size: 14px;
-            color: var(--text-dark);
-            font-weight: 500;
-        }
+/* ---------- HEADER ---------- */
+.header{
+    background:linear-gradient(90deg,rgba(0,63,140,.85),rgba(0,89,179,.85));
+    color:white;
+    padding:18px 36px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 
-        /* Pivot Table Container Styles */
-        #pivot-table-container {
-            min-height: 200px;
-            margin-top: 30px;
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            overflow-x: auto;
-        }
-        
-        #pivot-table-container table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        #pivot-table-container th, #pivot-table-container td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left; /* Default alignment */
-        }
-        
-        /* Headers for Row Fields (City, IRN Number) */
-        #pivot-table-container th:nth-child(1),
-        #pivot-table-container th:nth-child(2) {
-             text-align: left;
-        }
-        /* Headers and cells for Value Fields (Count) */
-        #pivot-table-container th:nth-child(n+3),
-        #pivot-table-container td:nth-child(n+3) {
-            text-align: center;
-        }
-        
-        #pivot-table-container th {
-            background-color: #f2f2f2;
-            color: var(--zippee-primary);
-            font-weight: 700;
-            white-space: nowrap;
-        }
-        #pivot-table-container tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        /* Grand Total Row Style */
-        #pivot-table-container tr.grand-total {
-            background-color: #e0e0e0;
-            font-weight: 700;
-        }
-        /* Style for data cells (counts) */
-        #pivot-table-container td:nth-child(n+3) {
-            font-weight: 600;
-        }
-        /* Style for City cells when they are empty (for grouped view) */
-        #pivot-table-container tr td:first-child:empty {
-             background-color: #f9f9f9; 
-        }
+.logo{
+    height:48px;
+}
 
-    </style>
+/* ---------- CARD ---------- */
+.card{
+    background:var(--glass-bg);
+    backdrop-filter:blur(10px) saturate(120%);
+    margin:30px auto;
+    max-width:1300px;
+    padding:30px;
+    border-radius:18px;
+    box-shadow:var(--card-shadow);
+}
+
+.title{
+    font-size:22px;
+    font-weight:700;
+    color:var(--primary-900);
+}
+
+/* ---------- CONTROLS ---------- */
+.controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:12px;
+}
+
+.button{
+    background:linear-gradient(135deg,#0A66C2,#0078FF);
+    border:none;
+    border-radius:10px;
+    padding:10px 16px;
+    color:white;
+    cursor:pointer;
+    font-weight:700;
+}
+
+/* ---------- REPORT AREA ---------- */
+#reportContainer{
+    margin-top:20px;
+    overflow-x:auto;
+}
+
+#captureBox{
+    display:inline-block;
+    position:relative;
+    padding:20px 30px;   /* left-right margin */
+}
+
+/* ---------- REPORT HEADER ---------- */
+.report-head{
+    text-align:center;
+    margin-bottom:8px;
+}
+
+.report-title{
+    font-size:18px;
+    font-weight:800;
+}
+
+.report-meta{
+    font-size:13px;
+}
+
+/* ---------- WATERMARK ---------- */
+.watermark{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    pointer-events:none;
+    z-index:0;
+}
+
+.watermark span{
+    font-size:44px;
+    font-weight:900;
+    color:rgba(0,0,0,0.07);
+    transform:rotate(-25deg);
+    text-align:center;
+    line-height:1.2;
+}
+
+/* ---------- TABLE ---------- */
+table{
+    border-collapse:collapse;
+    background:white;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,.12);
+    position:relative;
+    z-index:1;
+    white-space:nowrap;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:6px 10px;
+    font-size:13px;
+}
+
+/* ---------- FOOTER ---------- */
+.report-footer{
+    display:flex;
+    justify-content:center;
+    margin:12px 0;
+    font-size:12px;
+    font-weight:700;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="header-main">
-        <div class="header-logo">LOGO</div> 
-        <h1>📋 IRN Pendency Tracker</h1>
+<!-- HEADER -->
+<div class="header">
+    <h1>IRN Pendancy Report</h1>
+    <img class="logo" src="https://i.imgur.com/7yUVE8U.png">
+</div>
+
+<!-- CARD -->
+<div class="card">
+    <div class="title">Upload File</div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+        <input type="file" id="fileInput" accept=".csv" multiple>
+        <button class="button" onclick="downloadImage()">Download Image</button>
     </div>
 
-    <div class="report-container">
-        
-        <a href="#" onclick="alert('Redirecting to dummy dashboard')" class="back-button">← Back to Dashboard</a>
-        
-        <h2>IRN Pendency Analyzer (Cross-Tab Report)</h2>
-        
-        <p style="color: var(--text-dark); font-size: 16px;">
-            Upload multiple IRN data files (Excel or CSV) below. The tool will merge the data and generate a **Pivot Table** report summarizing **IRN Counts by City and Status**.
-        </p>
-        
-        <div class="upload-area">
-            <input type="file" id="file-input" multiple accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
-            <label for="file-input" class="custom-file-upload">
-                📂 Select IRN Files
-            </label>
-            <div id="status-message">Please select files to begin analysis.</div>
-        </div>
+    <!-- REPORT -->
+    <div id="reportContainer">
+        <div id="captureBox"></div>
+    </div>
+</div>
 
-        <h3>Pivot Table Output:</h3>
-        <div id="pivot-table-container">
-            <p style="text-align: center; color: var(--text-medium);">Data will load here after files are processed.</p>
-        </div>
+<script>
+// =======================
+// HELPERS
+// =======================
+function formatDateDDMMYYYY(isoDate){
+    if(!isoDate) return "";
+    const [y,m,d] = isoDate.slice(0,10).split("-");
+    return `${d}-${m}-${y}`;
+}
 
+// =======================
+// CONFIG
+// =======================
+const ALLOWED_STATUS = ["submitted","received","created"];
+
+const warehouseCityMap = {
+    prg:"Prayagraj",
+    prayagraj:"Prayagraj",
+    sur:"Surat",
+    surat:"Surat",
+    sil:"Siliguri",
+    mrd:"Moradabad",
+    nasik:"Nasik",
+    blr:"Bengaluru",
+    chn:"Chennai",
+    vdr:"Vadodara",
+    ahd:"Prayagraj"
+};
+
+function getCity(warehouse){
+    if(!warehouse) return "Unknown";
+    const w = warehouse.toLowerCase();
+    return warehouseCityMap[w] || warehouseCityMap[w.split("_")[0]] || warehouse;
+}
+
+// =======================
+// FILE UPLOAD
+// =======================
+document.getElementById("fileInput").addEventListener("change", e=>{
+    const files = e.target.files;
+    let allRows = [];
+    let done = 0;
+
+    for(const file of files){
+        Papa.parse(file,{
+            skipEmptyLines:true,
+            complete:res=>{
+                res.data.slice(1).forEach(r=>allRows.push(r));
+                if(++done === files.length) generateReport(allRows);
+            }
+        });
+    }
+});
+
+// =======================
+// REPORT GENERATION (D-1)
+// =======================
+function generateReport(rows){
+    const today = new Date().toISOString().slice(0,10);
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate()-1);
+    const d1 = yesterday.toISOString().slice(0,10);
+
+    let html = `
+    <div class="report-head">
+        <div class="report-title">IRN Pendancy Report</div>
+        <div class="report-meta">Date: ${formatDateDDMMYYYY(d1)}</div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const fileInput = document.getElementById('file-input');
-        const statusMessage = document.getElementById('status-message');
-        const pivotContainer = document.getElementById('pivot-table-container');
+    <div class="watermark">
+        <span>Harshit Saini<br>Zippee</span>
+    </div>
 
-        statusMessage.textContent = "Script loaded. Ready to process files.";
+    <table>
+        <tr>
+            <th>City</th>
+            <th>IRN Number</th>
+            <th>Status</th>
+            <th>Date</th>
+        </tr>
+    `;
 
-        fileInput.addEventListener('change', handleFileSelect);
+    rows.forEach(r=>{
+        const irn = r[0];
+        const status = (r[3]||"").toLowerCase().trim();
+        const warehouse = r[4];
+        const rawDate = r[10];
 
-        /**
-         * Handles file selection, reading, merging, and pivot table generation.
-         */
-        function handleFileSelect(event) {
-            const files = event.target.files;
-            if (files.length === 0) {
-                statusMessage.textContent = "Please select files to begin analysis.";
-                pivotContainer.innerHTML = '<p style="text-align: center; color: var(--text-medium);">Data will load here after files are processed.</p>';
-                return;
-            }
+        if(!irn || !rawDate) return;
+        if(!ALLOWED_STATUS.includes(status)) return;
 
-            statusMessage.textContent = `Processing ${files.length} file(s)... This may take a moment.`;
-            pivotContainer.innerHTML = '<p style="text-align: center; color: #0078D4;">Loading and merging data...</p>';
-            
-            let allData = [];
-            let filesProcessed = 0;
-            let filesFailed = 0;
+        const dateISO = rawDate.slice(0,10);
+        if(dateISO === today) return;
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const reader = new FileReader();
-
-                // Use closure to capture file context
-                reader.onload = (function(f) {
-                    return function(e) {
-                        try {
-                            // 1. Read the workbook using SheetJS (XLSX.read)
-                            const data = new Uint8Array(e.target.result);
-                            const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
-                            
-                            // 2. Convert the first sheet to an array of arrays (header: 1)
-                            const sheetName = workbook.SheetNames[0];
-                            const fileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { 
-                                header: 1, 
-                                defval: "", 
-                                raw: false 
-                            }); 
-                            
-                            if (fileData.length < 2) {
-                                console.warn(`File ${f.name} is empty or only contains headers.`);
-                                return;
-                            }
-
-                            // Simple header mapping: find indices of required columns, case-insensitive
-                            const headers = fileData[0].map(h => String(h).trim());
-                            const columnIndices = {
-                                City: headers.findIndex(h => h.toLowerCase() === 'city'),
-                                IRN: headers.findIndex(h => h.toLowerCase() === 'irn number' || h.toLowerCase() === 'irn'),
-                                Status: headers.findIndex(h => h.toLowerCase() === 'status'),
-                            };
-                            
-                            // Check if all essential columns are found
-                            if (columnIndices.City === -1 || columnIndices.IRN === -1 || columnIndices.Status === -1) {
-                                console.error(`File ${f.name} is missing essential columns (City, IRN Number, Status).`);
-                                filesFailed++;
-                                return;
-                            }
-
-                            // 3. Filter and map the 'fileData' (skip header row)
-                            const mappedData = fileData.slice(1).map(row => ({
-                                City: String(row[columnIndices.City] || 'N/A').trim(),
-                                'IRN Number': String(row[columnIndices.IRN] || 'N/A').trim(),
-                                Status: String(row[columnIndices.Status] || 'N/A').toLowerCase().trim(),
-                            })).filter(item => item.City && item['IRN Number'] && item.Status && item.City !== 'N/A');
-
-                            // 4. Merge the filtered data
-                            allData.push(...mappedData);
-                            
-                        } catch (error) {
-                            console.error(`Error processing file ${f.name}:`, error);
-                            filesFailed++;
-                        } finally {
-                            filesProcessed++;
-                            updateStatus(filesProcessed, files.length, filesFailed);
-
-                            if (filesProcessed === files.length) {
-                                // 5. Once all files are processed, generate the pivot table
-                                if (allData.length > 0) {
-                                    const pivotHTML = generatePivotTableHTML(allData, ['City', 'IRN Number'], 'Status');
-                                    pivotContainer.innerHTML = pivotHTML;
-                                    statusMessage.textContent = `✅ Successfully merged and analyzed ${allData.length} records from ${files.length} file(s).`;
-                                } else {
-                                    pivotContainer.innerHTML = '<p style="text-align: center; color: #cc0000; font-weight: 600;">⚠️ Could not find valid IRN data in any uploaded file.</p>';
-                                    statusMessage.textContent = `❌ Analysis failed. No valid data found after processing ${files.length} file(s).`;
-                                }
-                            }
-                        }
-                    }
-                })(file);
-                
-                reader.onerror = () => {
-                    filesProcessed++;
-                    filesFailed++;
-                    updateStatus(filesProcessed, files.length, filesFailed);
-                };
-
-                // Start reading the file as an ArrayBuffer for SheetJS
-                reader.readAsArrayBuffer(file);
-            }
-        }
-
-        /**
-         * Updates the status message during processing.
-         */
-        function updateStatus(processed, total, failed) {
-            let message = `Processed ${processed} of ${total} files.`;
-            if (failed > 0) {
-                message += ` (${failed} failed or invalid)`;
-            }
-            statusMessage.textContent = message;
-        }
-
-        /**
-         * Generates a basic HTML pivot table from the merged data.
-         * Pivot: Rows: [City, IRN Number], Columns: [Status], Values: Count.
-         */
-        function generatePivotTableHTML(data, rowFields, colField) {
-            // 1. Aggregate the data (Count of IRN Numbers by City and Status)
-            const aggregation = {};
-            const uniqueColValues = new Set();
-            const rowKeys = new Set();
-
-            data.forEach(row => {
-                const rowKey = rowFields.map(f => row[f]).join('|||'); // Unique key for combined row fields
-                const colValue = row[colField];
-
-                rowKeys.add(rowKey);
-                uniqueColValues.add(colValue);
-
-                if (!aggregation[rowKey]) {
-                    aggregation[rowKey] = {};
-                }
-                aggregation[rowKey][colValue] = (aggregation[rowKey][colValue] || 0) + 1;
-            });
-
-            const sortedColValues = Array.from(uniqueColValues).sort();
-            const sortedRowKeys = Array.from(rowKeys).sort();
-
-            // 2. Build the HTML table
-            let html = '<table>';
-
-            // Header Row
-            html += '<tr>';
-            rowFields.forEach(field => html += `<th>${field}</th>`);
-            sortedColValues.forEach(col => html += `<th>${col} (Count)</th>`);
-            html += '<th>Grand Total</th>';
-            html += '</tr>';
-
-            // Data Rows
-            let grandTotalCol = {};
-            let grandTotalAll = 0;
-            let previousCity = null; 
-
-            sortedRowKeys.forEach(rowKey => {
-                const rowValues = rowKey.split('|||');
-                const [city, irn] = rowValues; // Destructure for readability
-                const rowData = aggregation[rowKey];
-                let rowTotal = 0;
-
-                html += '<tr>';
-
-                // City Cell (Grouped - only display the first time)
-                if (city === previousCity) {
-                    html += '<td></td>'; 
-                } else {
-                    html += `<td>${city}</td>`;
-                    previousCity = city;
-                }
-
-                // IRN Number Cell (Always display)
-                html += `<td>${irn}</td>`;
-
-                // Status Counts
-                sortedColValues.forEach(col => {
-                    const count = rowData[col] || 0;
-                    html += `<td>${count}</td>`;
-                    rowTotal += count;
-                    grandTotalCol[col] = (grandTotalCol[col] || 0) + count;
-                });
-
-                // Row Grand Total
-                html += `<td>${rowTotal}</td>`;
-                grandTotalAll += rowTotal;
-                html += '</tr>';
-            });
-
-            // Grand Total Row
-            html += '<tr class="grand-total">';
-            html += '<td>Grand Total</td>';
-            html += '<td></td>'; // Placeholder for IRN Number column
-            
-            sortedColValues.forEach(col => html += `<td>${grandTotalCol[col] || 0}</td>`);
-            html += `<td>${grandTotalAll}</td>`;
-            html += '</tr>';
-
-            html += '</table>';
-            
-            return html;
-        }
+        html += `
+        <tr>
+            <td>${getCity(warehouse)}</td>
+            <td>${irn}</td>
+            <td>${status}</td>
+            <td>${formatDateDDMMYYYY(dateISO)}</td>
+        </tr>`;
     });
-    </script>
+
+    html += `
+    </table>
+
+    <div class="report-footer">
+        Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee
+    </div>
+    `;
+
+    document.getElementById("captureBox").innerHTML = html;
+}
+
+// =======================
+// IMAGE DOWNLOAD
+// =======================
+function downloadImage(){
+    const box = document.getElementById("captureBox");
+
+    html2canvas(box, {
+        scale: 3,                 // 🔥 HD quality
+        useCORS: true,
+        backgroundColor: "#ffffff"
+    }).then(canvas=>{
+        const a = document.createElement("a");
+        a.download = "IRN_Pendency_D-1_HD.png";
+        a.href = canvas.toDataURL("image/png", 1.0);
+        a.click();
+    });
+}
+</script>
 
 </body>
 </html>
