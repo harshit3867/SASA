@@ -8,17 +8,40 @@ function zippeeToggleMenu() {
   if (navLinks) navLinks.classList.toggle("active");
 }
 
-let activeProjectionData = null;
+function getLatestAvailableData(dateStr) {
+  const target = new Date(dateStr);
+
+  // sirf PAST ya SAME date allow
+  const valid = reportData.filter(r => {
+    const d = new Date(r.date);
+    return d <= target;
+  });
+
+  // agar kuch nahi mila → first row fallback
+  if (!valid.length) return reportData[0];
+
+  // latest past date
+  return valid[valid.length - 1];
+}
+
+
 
 // Hour
-function getCurrentHourLabel() {
-  const now = getEffectiveDateTime(); // ⭐ change yahan
-  let h = now.getHours();
+function getHourPercentageFor(dayName, hour) {
+  const start = hour % 12 || 12;
+  const end = (hour + 1) % 12 || 12;
+  const label = `${start}-${end}`;
 
-  let start = h % 12 || 12;
-  let end = (h + 1) % 12 || 12;
+  const row = hourPercentages.find(h => h.hour === label);
 
-  return `${start}-${end}`;
+  if (!row) {
+    return { label, percent: 0 };
+  }
+
+  return {
+    label,
+    percent: row[dayName] || 0
+  };
 }
 
 
@@ -63,6 +86,13 @@ let lastSummaryHTML = "";
 let lastProjectionHTML = "";
 
 let selectedDateTime = null; // null = live mode
+let activeProjectionData = null; 
+let blrDeepPain = [];
+let hydDeepPain = [];
+
+let blrDeepPainDetails = [];
+let hydDeepPainDetails = [];
+
 
 /* =========================
    GOOGLE SHEET (LIVE)
@@ -152,14 +182,13 @@ function getEffectiveDateTime() {
   return selectedDateTime ? new Date(selectedDateTime) : new Date();
 }
 
-
 function updateCurrentDateHeader() {
-  const now = new Date();
   const el = document.getElementById("currentDate");
-  if (el) {
-    el.textContent = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
-  }
+  if (!el || !activeProjectionData) return;
+
+  el.textContent = activeProjectionData.date;
 }
+
 
 function updateDateTime() {
   const el = document.getElementById("datetime");
@@ -184,6 +213,17 @@ setInterval(() => {
 }, 60 * 1000);
 
 });
+function getEffectiveHour() {
+  const now = getEffectiveDateTime();
+  let h = now.getHours(); 
+
+  // projection logic sirf 6 AM – 11 PM tak valid
+  if (h < 6) return 6;
+  if (h > 23) return 23;
+
+  return h;
+}
+
 /*****************************************************
  * PART 2: HOUR % LOGIC + PROJECTION TABLE
  *****************************************************/
@@ -216,26 +256,18 @@ const hourPercentages = [
    GET % FOR DAY + HOUR
 ========================= */
 
-function getHourPercentageFor(dayName, hour) {
-  let idx = hour - 6;
-  if (idx < 0) idx = 0;
-  if (idx >= hourPercentages.length) idx = hourPercentages.length - 1;
-
-  return {
-    label: hourPercentages[idx].hour,
-    percent: hourPercentages[idx][dayName] || 0
-  };
-}
 
 function getProjectionForStore(storeName) {
-  if (!activeProjectionData) return { fullDay: 0, till: 0, buffer: 0 };
+  if (!activeProjectionData || !activeProjectionData.stores) {
+    return { fullDay: 0, till: 0, buffer: 0 };
+  }
 
   const fullDay = activeProjectionData.stores[storeName] || 0;
 
   const now = getEffectiveDateTime();
   const hourInfo = getHourPercentageFor(
     getDayName(now),
-    now.getHours()
+    getEffectiveHour()
   );
 
   const till = Math.round(fullDay * (hourInfo.percent / 100));
@@ -261,18 +293,14 @@ function generateSummaryTable() {
   ========================= */
   let data;
 
-  if (selectedDateTime) {
-    const d = new Date(selectedDateTime);
+const d = selectedDateTime
+  ? new Date(selectedDateTime)
+  : new Date();
 
-    // ✅ FIX: MATCH GOOGLE SHEET FORMAT (DD/MM/YYYY)
-    const key = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+const key = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
 
-    data =
-      reportData.find(r => r.date === key) ||
-      reportData[reportData.length - 1]; // fallback safety
-  } else {
-    data = reportData[reportData.length - 1]; // live
-  }
+data = getLatestAvailableData(key);
+
 
   // ⭐ SINGLE SOURCE OF TRUTH
   activeProjectionData = data;
@@ -283,7 +311,7 @@ function generateSummaryTable() {
   const now = getEffectiveDateTime();
   const hourInfo = getHourPercentageFor(
     getDayName(now),
-    now.getHours()
+    getEffectiveHour()
   );
 
   const tillHourEl = document.getElementById("tillHour");
@@ -340,8 +368,6 @@ function generateSummaryTable() {
    GLOBAL HOLDERS
 ========================= */
 
-let deepPainOrderRows = [];
-let deepPainOrdersDetailsRows = [];
 /* =========================
    FILE UPLOAD HANDLER
 ========================= */
@@ -541,38 +567,46 @@ function bindFinalTableButton() {
 
     rows.forEach(r => {
       const store = r
-  .querySelector("td")
-  ?.innerText
-  .trim()
-  .toLowerCase()
-  .replace(/\s+/g, " ");
+        .querySelector("td")
+        ?.innerText
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
 
-      if (!store || store.toLowerCase() === "total") return;
+      if (!store || store === "total") return;
 
       if (CITY_STORES.bangalore.includes(store)) blr.push(r.cloneNode(true));
       if (CITY_STORES.hyderabad.includes(store)) hyd.push(r.cloneNode(true));
     });
 
     document.getElementById("output").innerHTML = `
-  <h2 style="margin:20px 0;color:#0b4ea2;">Bangalore</h2>
-  <button onclick="downloadTablePNG('blrTable','Bangalore_Report')">
-    ⬇ Download
-  </button>
-  <div id="blrTable">
-    ${buildFinalTable(blr)}
-  </div>
+      <h2>Bangalore</h2>
+      <button onclick="downloadTablePNG('blrTable','Bangalore_Report')">⬇ Download</button>
+      <button onclick="showBLRDeepPain()">Deep Pain Orders</button>
+      <button onclick="showBLRDeepPainDetails()">Deep Pain Details</button>
 
-  <h2 style="margin-top:40px;color:#0b4ea2;">Hyderabad</h2>
-  <button onclick="downloadTablePNG('hydTable','Hyderabad_Report')">
-    ⬇ Download
-  </button>
-  <div id="hydTable">
-    ${buildFinalTable(hyd)}
-  </div>
-`;
+      <div id="blrTable">
+        ${buildFinalTable(blr)}
+      </div>
 
+      <div id="blrDeepPainContainer"></div>
+
+      <hr style="margin:50px 0;">
+
+      <h2>Hyderabad</h2>
+      <button onclick="downloadTablePNG('hydTable','Hyderabad_Report')">⬇ Download</button>
+      <button onclick="showHYDDeepPain()">Deep Pain Orders</button>
+      <button onclick="showHYDDeepPainDetails()">Deep Pain Details</button>
+
+      <div id="hydTable">
+        ${buildFinalTable(hyd)}
+      </div>
+
+      <div id="hydDeepPainContainer"></div>
+    `;
   };
 }
+
 
 function buildFinalTable(rows) {
   const base = document.getElementById("summaryTable").cloneNode(true);
@@ -580,7 +614,11 @@ function buildFinalTable(rows) {
 
   const oldTfoot = base.querySelector("tfoot");
   if (oldTfoot) oldTfoot.remove();
- const hourLabel = getCurrentHourLabel();
+ const now = getEffectiveDateTime();
+const hourLabel = getHourPercentageFor(
+  getDayName(now),
+  getEffectiveHour()
+).label;
   /* =========================
      REBUILD HEADER (ONLY REQUIRED COLUMNS)
   ========================= */
@@ -739,15 +777,39 @@ const projBuffer = proj.buffer;
   `;
 
   tbody.appendChild(totalRow);
+  /* =========================
+   FOOTER ROW (BRANDING)
+========================= */
+const footerRow = document.createElement("tr");
+
+footerRow.innerHTML = `
+  <td colspan="15"
+      style="
+        text-align:center;
+        font-size:12px;
+        font-weight:500;
+        padding:10px;
+        color:#000;
+        border-top:1px solid #ddd;
+        letter-spacing:0.3px;
+      ">
+    Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee
+  </td>
+`;
+
+tbody.appendChild(footerRow);
+
   return base.outerHTML;
 }
+
 
 
 /*****************************************************
  * PART 4: DEEP PAIN ORDERS + DETAILS + SEARCH + UTILS
  *****************************************************/
 function extractDeepPainOrders(fileData) {
-  deepPainOrderRows = [];
+  blrDeepPain = [];
+  hydDeepPain = [];
 
   fileData.forEach(order => {
     const status = (order["Order Status"] || "").toLowerCase();
@@ -755,24 +817,29 @@ function extractDeepPainOrders(fileData) {
     const duration = Number(order["Breached Duration (In Min)"]) || 0;
 
     if (status === "delivered" && breached === "yes" && duration > 15) {
-      deepPainOrderRows.push({
+      const store = (order["Store Name"] || "")
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ");
+
+      const obj = {
         orderNumber: order["Order Number"] || "",
         orderDate: order["Order Date"] || "",
-        store: (order["Store Name"] || "")
-  .trim()
-  .toLowerCase()
-  .replace(/_/g, " ")
-  .replace(/\s+/g, " "),
+        store,
+        breached,
+        duration
+      };
 
-        breached: order["Breached"] || "",
-        duration: duration
-      });
+      if (CITY_STORES.bangalore.includes(store)) blrDeepPain.push(obj);
+      if (CITY_STORES.hyderabad.includes(store)) hydDeepPain.push(obj);
     }
   });
 }
 
 function extractDeepPainOrders_details(fileData) {
-  deepPainOrdersDetailsRows = [];
+  blrDeepPainDetails = [];
+  hydDeepPainDetails = [];
 
   fileData.forEach(order => {
     const status = (order["Order Status"] || "").toLowerCase();
@@ -780,86 +847,29 @@ function extractDeepPainOrders_details(fileData) {
     const duration = Number(order["Breached Duration (In Min)"]) || 0;
 
     if (status === "delivered" && breached === "yes" && duration > 15) {
-      deepPainOrdersDetailsRows.push({
+      const store = (order["Store Name"] || "")
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ");
+
+      const obj = {
         orderNumber: order["Order Number"] || "",
         orderDate: order["Order Date"] || "",
-        store: (order["Store Name"] || "")
-  .trim()
-  .toLowerCase()
-  .replace(/_/g, " ")
-  .replace(/\s+/g, " "),
-
-        breached: order["Breached"] || "",
-        duration: duration,
+        store,
+        breached,
+        duration,
         orderStatus: order["Order Status"] || "",
         customer: order["Customer Name"] || "",
         raw: JSON.stringify(order)
-      });
+      };
+
+      if (CITY_STORES.bangalore.includes(store)) blrDeepPainDetails.push(obj);
+      if (CITY_STORES.hyderabad.includes(store)) hydDeepPainDetails.push(obj);
     }
   });
 }
 
-/* =========================
-   RENDER DEEP PAIN TABLE
-========================= */
-
-function renderDeepPainTable(rows) {
-  const tbody = document.querySelector("#deepPainTable tbody");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  if (!rows.length) {
-    tbody.innerHTML =
-      "<tr><td colspan='6'>No Deep Pain Orders Found</td></tr>";
-    return;
-  }
-
-  rows.forEach(r => {
-    let date = r.orderDate;
-    if (!isNaN(date)) {
-      date = formatDate(excelDateToJSDate(Number(date)));
-    }
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.orderNumber}</td>
-      <td>${date}</td>
-      <td>${r.store}</td>
-      <td>${r.breached}</td>
-      <td>${r.duration}</td>
-      <td class="dp-bad">Deep Pain</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-/* =========================
-   TOGGLE DEEP PAIN SECTION
-========================= */
-
-document.getElementById("deepPainBtn")?.addEventListener("click", () => {
-  const sec = document.getElementById("deepPainSection");
-  if (!sec) return;
-
-  sec.style.display = sec.style.display === "none" ? "block" : "none";
-  if (sec.style.display === "block") {
-    renderDeepPainTable(deepPainOrderRows);
-  }
-});
-
-/* =========================
-   SEARCH – DEEP PAIN
-========================= */
-
-document.getElementById("deepPainSearch")?.addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  const filtered = deepPainOrderRows.filter(r =>
-    r.store.toLowerCase().includes(q) ||
-    String(r.orderNumber).includes(q)
-  );
-  renderDeepPainTable(filtered);
-});
 
 /* =========================
    RENDER DEEP PAIN DETAILS
@@ -895,41 +905,6 @@ function renderDeepPainDetailsTable(rows) {
     tbody.appendChild(tr);
   });
 }
-
-/* =========================
-   TOGGLE DETAILS SECTION
-========================= */
-
-document
-  .getElementById("DeepPainOrders_detailsBtn")
-  ?.addEventListener("click", () => {
-    const sec = document.getElementById(
-      "DeepPainOrders_detailsSection"
-    );
-    if (!sec) return;
-
-    sec.style.display = sec.style.display === "none" ? "block" : "none";
-    if (sec.style.display === "block") {
-      renderDeepPainDetailsTable(deepPainOrdersDetailsRows);
-    }
-  });
-
-/* =========================
-   SEARCH – DETAILS
-========================= */
-
-document
-  .getElementById("DeepPainOrders_detailsSearch")
-  ?.addEventListener("input", e => {
-    const q = e.target.value.toLowerCase();
-    const filtered = deepPainOrdersDetailsRows.filter(r =>
-      r.store.toLowerCase().includes(q) ||
-      String(r.orderNumber).includes(q) ||
-      r.orderStatus.toLowerCase().includes(q) ||
-      r.customer.toLowerCase().includes(q)
-    );
-    renderDeepPainDetailsTable(filtered);
-  });
 
 /* =========================
    UTILITIES
@@ -997,4 +972,79 @@ function downloadTablePNG(elementId, fileName) {
     element.style.overflow = originalOverflow;
     element.style.width = originalWidth;
   });
+}
+function renderDeepPainTable(rows, tableId) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  if (!rows.length) {
+    tbody.innerHTML =
+      "<tr><td colspan='6'>No Deep Pain Orders Found</td></tr>";
+    return;
+  }
+
+  rows.forEach(r => {
+    let date = r.orderDate;
+    if (!isNaN(date)) {
+      date = formatDate(excelDateToJSDate(Number(date)));
+    }
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.orderNumber}</td>
+      <td>${date}</td>
+      <td>${r.store}</td>
+      <td>${r.breached}</td>
+      <td>${r.duration}</td>
+      <td class="dp-bad">Deep Pain</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function showBLRDeepPain() {
+  const container = document.getElementById("blrDeepPainContainer");
+
+  container.innerHTML = `
+    <h3>Deep Pain Orders (Bangalore)</h3>
+    <table class="clean-table" id="blrDeepPainTable">
+      <thead>
+        <tr>
+          <th>Order No</th>
+          <th>Date</th>
+          <th>Store</th>
+          <th>Breached</th>
+          <th>Minutes</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `;
+
+  renderDeepPainTable(blrDeepPain, "blrDeepPainTable");
+}
+function showHYDDeepPain() {
+  const container = document.getElementById("hydDeepPainContainer");
+
+  container.innerHTML = `
+    <h3>Deep Pain Orders (Hyderabad)</h3>
+    <table class="clean-table" id="hydDeepPainTable">
+      <thead>
+        <tr>
+          <th>Order No</th>
+          <th>Date</th>
+          <th>Store</th>
+          <th>Breached</th>
+          <th>Minutes</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `;
+
+  renderDeepPainTable(hydDeepPain, "hydDeepPainTable");
 }
