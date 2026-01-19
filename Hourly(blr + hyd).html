@@ -199,7 +199,7 @@ footer{
 
         <div class="search-section">
             <label>Search before date:</label>
-            <input type="date" id="searchDate">
+
             <input type="time" id="searchTime">
             <button id="searchBtn">Search</button>
         </div>
@@ -209,8 +209,8 @@ footer{
                 <tr>
                     <th>Store Name</th>
                     <th>Projected Orders | <span id="currentDate"></span></th>
-                    <th>Projected Orders | till <span id="tillHour">---</span></th>
-                    <th>Projected Orders | till <span id="tillHour">---</span> (15% Buffer)</th>
+<th>Projected Orders | till <span id="tillHourMain">---</span></th>
+<th>Projected Orders | till <span id="tillHourBuffer">---</span> (15% Buffer)</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -223,8 +223,9 @@ footer{
 
         <div class="controls">
             <input type="file" id="fileInput">
-            <button id="submitBtn">Submit</button>
-            <button id="finalTableBtn" style="display:none;">Final Table</button>
+            <button id="submitBtn">Submit</button> <button id="finalTableBtn" style="display:none;">
+    Final Table
+  </button>
         </div>
 
         <div class="table-wrapper">
@@ -242,10 +243,9 @@ footer{
 <!-- ================= SCRIPTS ================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- 🔥 YOUR FINAL JS FILE -->
-<script src="myntra_blr_hyd_full.js"></script>
+<script src="myntra_blr_hyd_full.js?v=2"></script>
 
 </body>
 </html>
