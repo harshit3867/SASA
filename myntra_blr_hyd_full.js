@@ -233,18 +233,17 @@ const hourPercentages = [
   { hour: "10-11", Sunday: 18.11, Monday: 16.81, Tuesday: 20.44, Wednesday: 20.15, Thursday: 21.58, Friday: 19.74, Saturday: 16.98 },
   { hour: "11-12", Sunday: 25.91, Monday: 24.03, Tuesday: 25.81, Wednesday: 26.66, Thursday: 29.73, Friday: 26.46, Saturday: 24.20 },
   { hour: "12-1",  Sunday: 34.54, Monday: 31.10, Tuesday: 33.87, Wednesday: 32.85, Thursday: 36.84, Friday: 33.57, Saturday: 32.05 },
-  { hour: "1-2",   Sunday: 42.45, Monday: 37.18, Tuesday: 40.87, Wednesday: 38.63, Thursday: 43.05, Friday: 40.94, Saturday: 39.64 },
-  { hour: "2-3",   Sunday: 49.51, Monday: 44.34, Tuesday: 48.07, Wednesday: 44.64, Thursday: 51.02, Friday: 47.14, Saturday: 46.64 },
-  { hour: "3-4",   Sunday: 56.64, Monday: 51.31, Tuesday: 54.30, Wednesday: 50.99, Thursday: 58.56, Friday: 54.00, Saturday: 53.89 },
-  { hour: "4-5",   Sunday: 64.01, Monday: 57.76, Tuesday: 60.18, Wednesday: 58.48, Thursday: 65.94, Friday: 60.02, Saturday: 61.95 },
-  { hour: "5-6",   Sunday: 71.58, Monday: 65.32, Tuesday: 65.94, Wednesday: 66.58, Thursday: 72.89, Friday: 67.99, Saturday: 68.59 },
-  { hour: "6-7",   Sunday: 79.43, Monday: 72.97, Tuesday: 73.41, Wednesday: 74.25, Thursday: 79.41, Friday: 75.25, Saturday: 76.08 },
-  { hour: "7-8",   Sunday: 86.38, Monday: 80.87, Tuesday: 81.12, Wednesday: 81.05, Thursday: 85.75, Friday: 82.96, Saturday: 83.23 },
-  { hour: "8-9",   Sunday: 90.74, Monday: 87.60, Tuesday: 88.18, Wednesday: 89.10, Thursday: 90.90, Friday: 89.70, Saturday: 89.63 },
-  { hour: "9-10",  Sunday: 96.10, Monday: 95.01, Tuesday: 95.92, Wednesday: 95.15, Thursday: 95.73, Friday: 95.48, Saturday: 95.66 },
-  { hour: "10-11", Sunday: 100.0, Monday: 100.0, Tuesday: 100.0, Wednesday: 100.0, Thursday: 100.0, Friday: 100.0, Saturday: 100.0 }
+  { hour: "13-14",   Sunday: 42.45, Monday: 37.18, Tuesday: 40.87, Wednesday: 38.63, Thursday: 43.05, Friday: 40.94, Saturday: 39.64 },
+  { hour: "14-15",   Sunday: 49.51, Monday: 44.34, Tuesday: 48.07, Wednesday: 44.64, Thursday: 51.02, Friday: 47.14, Saturday: 46.64 },
+  { hour: "15-16",   Sunday: 56.64, Monday: 51.31, Tuesday: 54.30, Wednesday: 50.99, Thursday: 58.56, Friday: 54.00, Saturday: 53.89 },
+  { hour: "16-17",   Sunday: 64.01, Monday: 57.76, Tuesday: 60.18, Wednesday: 58.48, Thursday: 65.94, Friday: 60.02, Saturday: 61.95 },
+  { hour: "17-18",   Sunday: 71.58, Monday: 65.32, Tuesday: 65.94, Wednesday: 66.58, Thursday: 72.89, Friday: 67.99, Saturday: 68.59 },
+  { hour: "18-19",   Sunday: 79.43, Monday: 72.97, Tuesday: 73.41, Wednesday: 74.25, Thursday: 79.41, Friday: 75.25, Saturday: 76.08 },
+  { hour: "19-20",   Sunday: 86.38, Monday: 80.87, Tuesday: 81.12, Wednesday: 81.05, Thursday: 85.75, Friday: 82.96, Saturday: 83.23 },
+  { hour: "20-21",   Sunday: 90.74, Monday: 87.60, Tuesday: 88.18, Wednesday: 89.10, Thursday: 90.90, Friday: 89.70, Saturday: 89.63 },
+  { hour: "21-22",  Sunday: 96.10, Monday: 95.01, Tuesday: 95.92, Wednesday: 95.15, Thursday: 95.73, Friday: 95.48, Saturday: 95.66 },
+  { hour: "22-23", Sunday: 100.0, Monday: 100.0, Tuesday: 100.0, Wednesday: 100.0, Thursday: 100.0, Friday: 100.0, Saturday: 100.0 }
 ];
-
 /* =========================
    GET % FOR DAY + HOUR
 ========================= */
@@ -1048,4 +1047,5 @@ function showHYDDeepPain() {
 
   renderDeepPainTable(hydDeepPain, "hydDeepPainTable");
 }
+
 
