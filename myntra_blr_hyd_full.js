@@ -48,34 +48,27 @@ function getHourPercentageFor(dayName, hour) {
 /* =========================
    CITY → STORE MAPPING
 ========================= */
+const STORE_ORDER = [
+  "kalyan nagar mnow",
+  "basaveshwar nagar mnow",
+  "jakkur mnow",
+  "begur mnow",
+  "thyagaraja nagar mnow",
+  "brookfield mnow",
+  "jp nagar mnow",
+  "sarjapur road mnow",
+  "manikonda mnow",
+  "gachibowli mnow",
+  "attapur mnow",
+  "nizampet mnow"
+];
 
 const CITY_STORES = {
-  bangalore: [
-    "Basaveshwar Nagar mnow",
-    "Begur mnow",
-    "Brookfield mnow",
-    "Jakkur mnow",
-    "JP nagar mnow",
-    "Kalyan Nagar mnow",
-    "Sarjapur Road mnow",
-    "Thyagaraja Nagar mnow"
-  ].map(s => s.toLowerCase().replace(/\s+/g, " ")),
-
-  hyderabad: [
-    "Attapur mnow",
-    "Gachibowli mnow",
-    "Manikonda mnow",
-    "Nizampet mnow"
-  ].map(s => s.toLowerCase().replace(/\s+/g, " "))
+  bangalore: STORE_ORDER.slice(0, 8),
+  hyderabad: STORE_ORDER.slice(8)
 };
 
-const ALL_STORES = [
-  ...CITY_STORES.bangalore,
-  ...CITY_STORES.hyderabad
-].map(s =>
-  s.trim().toLowerCase().replace(/\s+/g, " ")
-);
-
+const ALL_STORES = STORE_ORDER;
 
 /* =========================
    GLOBAL STATE
@@ -324,24 +317,26 @@ data = getLatestAvailableData(key);
   let totalTill = 0;
   let totalBuffer = 0;
 
-  Object.keys(data.stores).forEach(store => {
-    const fullDay = data.stores[store] || 0;
-    const tillNow = Math.round(fullDay * (hourInfo.percent / 100));
-    const buffer = Math.round(tillNow * 1.15);
+  ALL_STORES.forEach(store => {
+  if (!(store in data.stores)) return;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${store}</td>
-      <td>${fullDay}</td>
-      <td>${tillNow}</td>
-      <td>${buffer}</td>
-    `;
-    tableBody.appendChild(tr);
+  const fullDay = data.stores[store] || 0;
+  const tillNow = Math.round(fullDay * (hourInfo.percent / 100));
+  const buffer = Math.round(tillNow * 1.15);
 
-    totalFull += fullDay;
-    totalTill += tillNow;
-    totalBuffer += buffer;
-  });
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${formatStoreName(store)}</td>
+    <td>${fullDay}</td>
+    <td>${tillNow}</td>
+    <td>${buffer}</td>
+  `;
+  tableBody.appendChild(tr);
+
+  totalFull += fullDay;
+  totalTill += tillNow;
+  totalBuffer += buffer;
+});
 
   /* =========================
      4️⃣ TOTAL ROW
@@ -494,7 +489,7 @@ function generateSummaryPage(
     deep: 0
   };
 
-  Object.keys(storeOrders).forEach((store, i) => {
+STORE_ORDER.forEach(store => {
     const total = storeOrders[store] || 0;
     const cancel = cancelledOrders[store] || 0;
     const deliver = deliveredOrders[store] || 0;
@@ -607,6 +602,11 @@ function bindFinalTableButton() {
   };
 }
 
+function formatStoreName(store) {
+  return store
+    .replace(/^hyd\s+/i, "")          // agar future mein HYD aa jaye
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
 
 function buildFinalTable(rows) {
   const base = document.getElementById("summaryTable").cloneNode(true);
@@ -727,7 +727,7 @@ const projBuffer = proj.buffer;
     /* ===== FINAL ROW ===== */
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${store}</td>
+      <td>${formatStoreName(store)}</td>
       <td>${projFull}</td>
       <td>${projTill}</td>
       <td>${projBuffer}</td>
