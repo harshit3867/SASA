@@ -343,7 +343,7 @@ data = getLatestAvailableData(key);
   ========================= */
   const totalRow = document.createElement("tr");
   totalRow.style.fontWeight = "bold";
-  totalRow.style.background = "#ffe066";
+  totalRow.style.background = "#0078FF";
   totalRow.innerHTML = `
     <td>Total</td>
     <td>${totalFull}</td>
@@ -1048,3 +1048,4 @@ function showHYDDeepPain() {
 
   renderDeepPainTable(hydDeepPain, "hydDeepPainTable");
 }
+
