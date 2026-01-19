@@ -244,10 +244,36 @@ const hourPercentages = [
   { hour: "21-22",  Sunday: 96.10, Monday: 95.01, Tuesday: 95.92, Wednesday: 95.15, Thursday: 95.73, Friday: 95.48, Saturday: 95.66 },
   { hour: "22-23", Sunday: 100.0, Monday: 100.0, Tuesday: 100.0, Wednesday: 100.0, Thursday: 100.0, Friday: 100.0, Saturday: 100.0 }
 ];
+function getTodayCumulativePercentage(dayName, hour) {
+  const row = hourPercentages.find(h => {
+    const [start] = h.hour.split("-").map(Number);
+    return start === hour;
+  });
+
+  return row ? (row[dayName] || 0) : 0;
+}
+function mapToProjectionHour(h) {
+  if (h >= 6 && h < 12) return h;        // 6–11 AM
+  if (h >= 12 && h < 18) return h - 12; // 12–5 PM → 12,1,2,3,4,5
+  if (h >= 18 && h <= 23) return h - 12; // 6–11 PM → 6,7,8,9,10,11
+  return 6;
+}
+
+
 /* =========================
    GET % FOR DAY + HOUR
 ========================= */
+function getCumulativeHourLabel(endHour) {
+  const startHour = 6;
 
+  const format = h => {
+    const hour12 = h % 12 || 12;
+    const suffix = h < 12 ? "AM" : "PM";
+    return `${hour12} ${suffix}`;
+  };
+
+  return `${format(startHour)} – ${format(endHour)}`;
+}
 
 function getProjectionForStore(storeName) {
   if (!activeProjectionData || !activeProjectionData.stores) {
@@ -256,14 +282,14 @@ function getProjectionForStore(storeName) {
 
   const fullDay = activeProjectionData.stores[storeName] || 0;
 
-  const now = getEffectiveDateTime();
-  const hourInfo = getHourPercentageFor(
-    getDayName(now),
-    getEffectiveHour()
-  );
+const now = getEffectiveDateTime();
+const day = getDayName(now);
+const hour = getEffectiveHour();
 
-  const till = Math.round(fullDay * (hourInfo.percent / 100));
-  const buffer = Math.round(till * 1.15);
+const cumulativePercent = getTodayCumulativePercentage(day, hour);
+
+const till = Math.round(fullDay * (cumulativePercent / 100));
+const buffer = Math.round(till * 1.15);
 
   return { fullDay, till, buffer };
 }
@@ -280,66 +306,51 @@ function generateSummaryTable() {
 
   tableBody.innerHTML = "";
 
-  /* =========================
-     1️⃣ PICK CORRECT DATE DATA
-  ========================= */
-  let data;
+  // 1️⃣ Correct date data
+  const d = selectedDateTime ? new Date(selectedDateTime) : new Date();
+  const key = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+  const data = getLatestAvailableData(key);
 
-const d = selectedDateTime
-  ? new Date(selectedDateTime)
-  : new Date();
-
-const key = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
-
-data = getLatestAvailableData(key);
-
-
-  // ⭐ SINGLE SOURCE OF TRUTH
   activeProjectionData = data;
 
-  /* =========================
-     2️⃣ HOUR CALCULATION
-  ========================= */
+  // 2️⃣ Time + cumulative %
   const now = getEffectiveDateTime();
-  const hourInfo = getHourPercentageFor(
-    getDayName(now),
-    getEffectiveHour()
-  );
+  const day = getDayName(now);
+  const hour = getEffectiveHour();
+  const cumulativePercent = getTodayCumulativePercentage(day, hour);
 
-  const tillHourEl = document.getElementById("tillHour");
-  if (tillHourEl) tillHourEl.textContent = hourInfo.label;
+  // (label optional, numbers pe koi effect nahi)
+  const label = getCumulativeHourLabel(hour);
+  document.getElementById("tillHourMain").textContent = label;
+  document.getElementById("tillHourBuffer").textContent = label;
 
-  /* =========================
-     3️⃣ BUILD TABLE ROWS
-  ========================= */
+  // 3️⃣ Build rows (REAL cumulative)
   let totalFull = 0;
   let totalTill = 0;
   let totalBuffer = 0;
 
   ALL_STORES.forEach(store => {
-  if (!(store in data.stores)) return;
+    if (!(store in data.stores)) return;
 
-  const fullDay = data.stores[store] || 0;
-  const tillNow = Math.round(fullDay * (hourInfo.percent / 100));
-  const buffer = Math.round(tillNow * 1.15);
+    const fullDay = data.stores[store] || 0;
+    const tillNow = Math.round(fullDay * (cumulativePercent / 100));
+    const buffer = Math.round(tillNow * 1.15);
 
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td>${formatStoreName(store)}</td>
-    <td>${fullDay}</td>
-    <td>${tillNow}</td>
-    <td>${buffer}</td>
-  `;
-  tableBody.appendChild(tr);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatStoreName(store)}</td>
+      <td>${fullDay}</td>
+      <td>${tillNow}</td>
+      <td>${buffer}</td>
+    `;
+    tableBody.appendChild(tr);
 
-  totalFull += fullDay;
-  totalTill += tillNow;
-  totalBuffer += buffer;
-});
+    totalFull += fullDay;
+    totalTill += tillNow;
+    totalBuffer += buffer;
+  });
 
-  /* =========================
-     4️⃣ TOTAL ROW
-  ========================= */
+  // 4️⃣ Total row
   const totalRow = document.createElement("tr");
   totalRow.style.fontWeight = "bold";
   totalRow.style.background = "#0078FF";
@@ -353,6 +364,7 @@ data = getLatestAvailableData(key);
 
   lastProjectionHTML = document.getElementById("reportTable").outerHTML;
 }
+
 
 /*****************************************************
  * PART 3: EXCEL UPLOAD + SUMMARY + FINAL SPLIT TABLE
@@ -614,10 +626,7 @@ function buildFinalTable(rows) {
   const oldTfoot = base.querySelector("tfoot");
   if (oldTfoot) oldTfoot.remove();
  const now = getEffectiveDateTime();
-const hourLabel = getHourPercentageFor(
-  getDayName(now),
-  getEffectiveHour()
-).label;
+const hourLabel = getCumulativeHourLabel(getEffectiveHour());
   /* =========================
      REBUILD HEADER (ONLY REQUIRED COLUMNS)
   ========================= */
@@ -1047,5 +1056,3 @@ function showHYDDeepPain() {
 
   renderDeepPainTable(hydDeepPain, "hydDeepPainTable");
 }
-
-
