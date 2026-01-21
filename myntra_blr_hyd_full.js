@@ -55,7 +55,7 @@ const STORE_ORDER = [
   "begur mnow",
   "thyagaraja nagar mnow",
   "brookfield mnow",
-  "jp nagar mnow",
+  "hulimavu mnow",
   "sarjapur road mnow",
   "manikonda mnow",
   "gachibowli mnow",
@@ -313,6 +313,10 @@ function generateSummaryTable() {
   const data = getLatestAvailableData(key);
 
   activeProjectionData = data;
+  // 🔥 Update header date dynamically
+const [mm, dd, yyyy] = data.date.split("/");
+document.getElementById("currentDate").textContent = `${dd}/${mm}/${yyyy}`;
+
 
   // 2️⃣ Time + cumulative %
   const now = getEffectiveDateTime();
