@@ -12,6 +12,30 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
+/* ====== SASA LOADING SCREEN ====== */
+#sasaLoader{
+  position:fixed;
+  inset:0;
+  background:#001c38;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:99999;
+}
+
+.dots::after{
+  content:"";
+  animation:dots 1.4s steps(4,end) infinite;
+}
+
+@keyframes dots{
+  0%{content:"."}
+  33%{content:".."}
+  66%{content:"..."}
+}
+
 :root{
     --primary-900:#003f8c;
     --glass-bg:rgba(255,255,255,0.16);
@@ -193,42 +217,46 @@ table{
     box-shadow:0 8px 20px rgba(51, 93, 229, 0.12);
     position:relative;
     z-index:1;
-    min-width:900px;
+    min-width:700px;
 }
 
 th,td{
     border:1px solid #ddd;
-    padding:6px 10px;
+    padding:4px 8px;        /* less space */
     white-space:nowrap;
-    font-size:13px;
-    text-align:right;
+    font-size:12px;         /* slightly smaller text */
+    text-align:center;      /* ⭐ everything centered */
+    vertical-align:middle;
 }
 
 th{
     background:#062e44;
     color:white;
     text-align:center;
+    font-size:12px;
+    padding:6px;
 }
 
 td.store{
-    text-align:left;
+    text-align:center;
     font-weight:700;
     background:#e9ecef;
 }
 
 td.date{
-    text-align:left;
-    padding-left:24px;
+    text-align:center;
+    padding-left:0;
 }
 
 td.total-label{
-    text-align:left !important;
+    text-align:center !important;   /* ✅ center Total label */
     font-weight:800;
 }
 
 tfoot td{
     font-weight:800;
     background:#dee2e6;
+    text-align:center;      /* ✅ center Grand Total row */
 }
 
 /* FOOTER */
@@ -246,6 +274,14 @@ tfoot td{
 </head>
 
 <body>
+<!-- ⭐ SASA Loading Screen ⭐ -->
+<div id="sasaLoader" style="display:none;">
+  <img src="SASA.png" alt="SASA" style="height:120px;margin-bottom:8px;">
+  <div style="font-size:18px;font-weight:700">
+    SASA is loading your analytics<span class="dots"></span>
+  </div>
+</div>
+
 
 <!-- HEADER -->
 <div class="header">
@@ -260,11 +296,6 @@ tfoot td{
     <div class="controls">
     <input type="file" id="zipFile" accept=".zip">
 
-    <button class="download-btn"
-      style="background:linear-gradient(135deg,#25D366,#128C7E)"
-      onclick="shareAllTables()">
-      Share All on WhatsApp
-    </button>
 </div>
 
     <div id="reportContainer">
@@ -276,11 +307,6 @@ tfoot td{
             </div>
 
             <div class="table-wrapper" id="tableContainer"></div>
-
-            <div class="report-footer">
-                Powered by SASA Automation | Harshit Saini - Data Analyst,Zippee
-            </div>
-
         </div>
     </div>
 </div>
@@ -306,6 +332,7 @@ document.getElementById("meta").innerText =
 `Date: ${new Date().toLocaleDateString("en-GB")} | Time: ${new Date().toLocaleTimeString()}`;
 
 document.getElementById("zipFile").addEventListener("change", async e=>{
+    document.getElementById("sasaLoader").style.display = "flex";
     const zip=await JSZip.loadAsync(e.target.files[0]);
     for(const f of Object.keys(zip.files)){
         if(f.endsWith(".csv")){
@@ -358,6 +385,7 @@ function buildPivot(data) {
             renderTable(pivot, client);
         }
     });
+    document.getElementById("sasaLoader").style.display = "none";
 }
 
 
@@ -366,12 +394,10 @@ function renderTable(p, clientName){
 
     const safeName = clientName.replace(/\s+/g, "_");
     const boxId = `box_${safeName}`;
-    window.__ALL_TABLE_BOXES = window.__ALL_TABLE_BOXES || [];
-window.__ALL_TABLE_BOXES.push({ boxId, clientName });
     const tableId = `table_${safeName}`;
 
 let h = `
-<div style="display:flex; justify-content:flex-end; margin-top:40px">
+<div style="display:flex; justify-content:flex-end; margin-top:20px">
   <button class="download-btn"
     onclick="downloadPNG('${boxId}', '${clientName}')">
     Download PNG
@@ -467,49 +493,6 @@ function downloadPNG(boxId, clientName) {
         link.click();
     });
 }
-function shareAllTables() {
-
-  // remove blur so images are clear
-  document.body.classList.remove("blur-active");
-
-  if (!window.__ALL_TABLE_BOXES || window.__ALL_TABLE_BOXES.length === 0) {
-    alert("No tables available to share.");
-    return;
-  }
-
-  let delay = 0;
-
-  window.__ALL_TABLE_BOXES.forEach(({ boxId, clientName }, index) => {
-
-    const element = document.getElementById(boxId);
-    if (!element) return;
-
-    setTimeout(() => {
-      html2canvas(element, {
-        scale: 2,
-        backgroundColor: "#ffffff"
-      }).then(canvas => {
-
-        const link = document.createElement("a");
-        link.download = `${clientName}_Order_Status_Report.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-
-      });
-    }, delay);
-
-    delay += 1200; // 1.2 sec gap between downloads
-  });
-
-  // Open WhatsApp ONCE
-  setTimeout(() => {
-    const text = encodeURIComponent(
-      "All client order status reports have been downloaded.\n\nPlease attach all images and share."
-    );
-    window.open(`https://wa.me/?text=${text}`, "_blank");
-  }, delay + 500);
-}
-
 
   // ============ TAB SWITCH BLUR PROTECTION ============
 
