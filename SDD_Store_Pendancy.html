@@ -196,12 +196,12 @@ table{
     min-width:900px;
 }
 
-th,td{
+th, td{
     border:1px solid #ddd;
     padding:6px 10px;
     white-space:nowrap;
     font-size:13px;
-    text-align:right;
+    text-align:center;   /* ✅ center everything */
 }
 
 th{
@@ -211,18 +211,19 @@ th{
 }
 
 td.store{
-    text-align:left;
+    text-align:center;
     font-weight:700;
     background:#e9ecef;
 }
 
 td.date{
-    text-align:left;
-    padding-left:24px;
+    text-align:center;
+    padding-left :12px;
+    font-weight:700;
 }
 
 td.total-label{
-    text-align:left !important;
+    text-align:center !important;
     font-weight:800;
 }
 
@@ -400,7 +401,13 @@ function renderStoreTable(p, storeName){
         <tbody>
     `;
 
-    Object.keys(p).sort().forEach(d => {
+    Object.keys(p)
+  .sort((a, b) => {
+    const [da, ma, ya] = a.split("/");
+    const [db, mb, yb] = b.split("/");
+    return new Date(yb, mb - 1, db) - new Date(ya, ma - 1, da);
+  })
+  .forEach(d => {
         const r = p[d];
         const t = r["Attempted Delivery"] + r["Not Dispatched"] + r["Pickedup"];
 
