@@ -39,10 +39,17 @@
     color:#ffffff;
     font-weight:800;
 }
+.city-block table{
+  margin: 0 auto;   /* 👈 centers table horizontally */
+}
 
 .city-wrapper{
   display:inline-block;
   margin:10px;
+}
+.city-block h3{
+  text-align:center;
+  margin-bottom:12px;
 }
 
 .city-block{
@@ -191,7 +198,6 @@ th,td{
 
     <div class="controls">
         <input type="file" id="multiUpload" accept=".xlsx,.xls,.csv" multiple>
-        <button class="button" onclick="processFiles()">Generate Report</button>
     </div>
 
     <p id="message" style="color:red;font-weight:700;"></p>
@@ -628,6 +634,12 @@ document.addEventListener("keydown",function(e){
   if(e.ctrlKey&&e.shiftKey) e.preventDefault();
   if(e.ctrlKey&&['U','u'].includes(e.key)) e.preventDefault();
 });
+
+document.getElementById("multiUpload").addEventListener("change", function () {
+    document.getElementById("message").textContent = "";
+    processFiles();
+});
+
 </script>
 
 </body>
