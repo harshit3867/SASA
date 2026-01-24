@@ -114,7 +114,7 @@ body::before{
 }
 
 .report-meta{
-    font-size:13px;
+    font-size:11px;
 }
 .download-btn {
     margin: 10px 0 15px;
@@ -134,7 +134,7 @@ body::before{
     background:#2f3e46;
     color:white;
     padding:10px 12px;
-    border-radius:12px 12px 0 0;
+    border-radius:0;
     font-weight:800;
 }
 
@@ -193,14 +193,14 @@ table{
     box-shadow:0 8px 20px rgba(51, 93, 229, 0.12);
     position:relative;
     z-index:1;
-    min-width:900px;
+    min-width:400px;
 }
 
 th, td{
     border:1px solid #ddd;
-    padding:6px 10px;
+    padding:3px 7px;
     white-space:nowrap;
-    font-size:13px;
+    font-size:11px;
     text-align:center;   /* ✅ center everything */
 }
 
@@ -272,7 +272,7 @@ tfoot td{
         <div id="captureBox">
 
             <div class="report-head">
-                <div class="report-title">Attempted vs Not Dispatched vs Pickedup</div>
+                <div class="report-title">Attempted vs Not Dispatched</div>
                 <div class="report-meta" id="meta"></div>
             </div>
 
@@ -292,7 +292,7 @@ const ALLOWED_STORES=[
 "BLR_koramangala","CH_Periyamet","KOL-Topsia","PUN_koregaon-park"
 ];
 
-const ALLOWED_STATUS=["Attempted Delivery","Not Dispatched","Pickedup"];
+const ALLOWED_STATUS=["Attempted Delivery","Not Dispatched"];
 
 document.getElementById("meta").innerText =
 `Date: ${new Date().toLocaleDateString("en-GB")} | Time: ${new Date().toLocaleTimeString()}`;
@@ -346,7 +346,6 @@ function buildPivot(data) {
         pivot[store][date] ??= {
             "Attempted Delivery": 0,
             "Not Dispatched": 0,
-            "Pickedup": 0
         };
 
         pivot[store][date][status]++;
@@ -363,7 +362,6 @@ function renderStoreTable(p, storeName){
     let g = {
       "Attempted Delivery": 0,
       "Not Dispatched": 0,
-      "Pickedup": 0
     };
 
     const safeName = storeName.replace(/\W+/g, "_");
@@ -394,7 +392,6 @@ function renderStoreTable(p, storeName){
             <th>Date</th>
             <th>Attempted Delivery</th>
             <th>Not Dispatched</th>
-            <th>Pickedup</th>
             <th>Total</th>
           </tr>
         </thead>
@@ -409,7 +406,7 @@ function renderStoreTable(p, storeName){
   })
   .forEach(d => {
         const r = p[d];
-        const t = r["Attempted Delivery"] + r["Not Dispatched"] + r["Pickedup"];
+        const t = r["Attempted Delivery"] + r["Not Dispatched"];
 
         Object.keys(g).forEach(k => g[k] += r[k]);
 
@@ -418,7 +415,6 @@ function renderStoreTable(p, storeName){
           <td class="date">${d}</td>
           <td>${r["Attempted Delivery"]}</td>
           <td>${r["Not Dispatched"]}</td>
-          <td>${r["Pickedup"]}</td>
           <td>${t}</td>
         </tr>`;
     });
@@ -430,8 +426,7 @@ function renderStoreTable(p, storeName){
             <td class="total-label">Total</td>
             <td>${g["Attempted Delivery"]}</td>
             <td>${g["Not Dispatched"]}</td>
-            <td>${g["Pickedup"]}</td>
-            <td>${g["Attempted Delivery"] + g["Not Dispatched"] + g["Pickedup"]}</td>
+            <td>${g["Attempted Delivery"] + g["Not Dispatched"]}</td>
           </tr>
         </tfoot>
       </table>
