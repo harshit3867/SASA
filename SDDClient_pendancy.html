@@ -310,6 +310,9 @@ tfoot td{
     <input type="file" id="zipFile" accept=".zip">
 
 </div>
+<button class="download-btn" onclick="downloadAllPNGs()">
+  Download ALL Reports
+</button>
 
     <div id="reportContainer">
         <div id="captureBox">
@@ -408,6 +411,9 @@ function renderTable(p, clientName){
     const safeName = clientName.replace(/\s+/g, "_");
     const boxId = `box_${safeName}`;
     const tableId = `table_${safeName}`;
+    window.__ALL_TABLE_BOXES = window.__ALL_TABLE_BOXES || [];
+window.__ALL_TABLE_BOXES.push({ boxId, clientName });
+
 
 let h = `
 <div style="display:flex; justify-content:flex-end; margin-top:20px">
@@ -525,6 +531,37 @@ function downloadPNG(boxId, clientName) {
   window.addEventListener("focus", function () {
     document.body.classList.remove("blur-active");
   });
+
+  function downloadAllPNGs() {
+  document.body.classList.remove("blur-active");
+
+  if (!window.__ALL_TABLE_BOXES || window.__ALL_TABLE_BOXES.length === 0) {
+    alert("No client tables available.");
+    return;
+  }
+
+  let delay = 0;
+
+  window.__ALL_TABLE_BOXES.forEach(({ boxId, clientName }) => {
+    const element = document.getElementById(boxId);
+    if (!element) return;
+
+    setTimeout(() => {
+      html2canvas(element, {
+        scale: 2,
+        backgroundColor: "#ffffff"
+      }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = `${clientName}_Order_Status_Report.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }, delay);
+
+    delay += 1200; // small gap to avoid browser choking
+  });
+}
+
 </script>
 
 <!-- 🔒 ADD BLOCKERS HERE (NEW SCRIPT) -->
