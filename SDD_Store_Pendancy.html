@@ -261,11 +261,11 @@ tfoot td{
     <div class="controls">
     <input type="file" id="zipFile" accept=".zip">
 
-    <button class="download-btn"
-      style="background:linear-gradient(135deg,#25D366,#128C7E)"
-      onclick="shareAllTables()">
-      Share All on WhatsApp
-    </button>
+<button class="download-btn"
+  onclick="downloadAllPNGs()">
+  Download ALL Reports
+</button>
+
 </div>
 
     <div id="reportContainer">
@@ -457,20 +457,17 @@ function downloadPNG(boxId, clientName) {
         link.click();
     });
 }
-function shareAllTables() {
-
-  // remove blur so images are clear
+function downloadAllPNGs() {
   document.body.classList.remove("blur-active");
 
   if (!window.__ALL_TABLE_BOXES || window.__ALL_TABLE_BOXES.length === 0) {
-    alert("No tables available to share.");
+    alert("No reports available to download.");
     return;
   }
 
   let delay = 0;
 
-  window.__ALL_TABLE_BOXES.forEach(({ boxId, clientName }, index) => {
-
+  window.__ALL_TABLE_BOXES.forEach(({ boxId, clientName }) => {
     const element = document.getElementById(boxId);
     if (!element) return;
 
@@ -479,27 +476,16 @@ function shareAllTables() {
         scale: 2,
         backgroundColor: "#ffffff"
       }).then(canvas => {
-
         const link = document.createElement("a");
-        link.download = `${clientName}_Order_Status_Report.png`;
+        link.download = `${clientName}_Order_Pendency_Report.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-
       });
     }, delay);
 
-    delay += 1200; // 1.2 sec gap between downloads
+    delay += 1200; // safe gap
   });
-
-  // Open WhatsApp ONCE
-  setTimeout(() => {
-    const text = encodeURIComponent(
-      "All client order status reports have been downloaded.\n\nPlease attach all images and share."
-    );
-    window.open(`https://wa.me/?text=${text}`, "_blank");
-  }, delay + 500);
 }
-
 
   // ============ TAB SWITCH BLUR PROTECTION ============
 
