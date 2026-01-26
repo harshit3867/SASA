@@ -253,23 +253,91 @@ function process(data){
     let AU=r[IDX.F]?String(r[IDX.F]).slice(-6):"";
     let AV=r[IDX.I]?String(r[IDX.I]).slice(-6):"";
 
-    let AW="SDD Delivery";
-    if(AU==="562162")AW="Warehouse Order";
-    else if(
-      r[IDX.D]==="Supertail_Hyperlocal" &&
-      ba && ba.getHours()>=8 && ba.getHours()<20 &&
-      AV!=="560049" || r[IDX.G]==="BLRDS KALYAN NAGAR"
-    )AW="2 Hours Delivery";
+// ===== MODEL (AW) – Excel logic =====
+let AW = "SDD Delivery";
 
-    let AX="";
-    if(r[IDX.D]==="Supertails-Gurgaon")
-      AX=ba.getHours()<13?endOfDay(ba):endOfDay(addDays(ba,1));
-    else if(AW==="SDD Delivery" && r[IDX.D]==="Supertails_SDD")
-      AX=ba.getHours()<13?endOfDay(ba):endOfDay(addDays(ba,1));
-    else if(["Supertail_Hyperlocal","Supertails_Hyperlocal"].includes(r[IDX.D]))
-      AX=bb;
-    else if(AW==="Warehouse Order")
-      AX=ba.getHours()<11?endOfDay(ba):endOfDay(addDays(ba,1));
+if (AU === "562162") {
+  AW = "Warehouse Order";
+
+} else if (
+  ["Supertails-Varthur", "Supertail_Hyperlocal"].includes(r[IDX.D]) &&
+  AV !== "560049" &&
+  (ba.getHours() >= 20 || ba.getHours() < 8)
+) {
+  AW = "SF Previous";
+
+} else if (
+  ["Supertails-Varthur", "Supertail_Hyperlocal"].includes(r[IDX.D]) &&
+  ba.getHours() >= 8 &&
+  ba.getHours() < 20 &&
+  AV !== "560049" &&
+  ["BLR Darkstore VTR", "BLRDS KALYAN NAGAR"].includes(r[IDX.G])
+) {
+  AW = "2 Hours Delivery";
+}
+
+
+// ===== TAT / SLA DEADLINE (AX) – Excel logic =====
+let AX = "";
+
+// Gurgaon
+if (r[IDX.D] === "Supertails-Gurgaon") {
+  AX = ba.getHours() < 13
+    ? endOfDay(ba)
+    : endOfDay(addDays(ba, 1));
+}
+
+// SDD – same day
+else if (
+  AW === "SDD Delivery" &&
+  (
+    (r[IDX.D] === "Supertails-Varthur" && ba.getHours() < 14) ||
+    (r[IDX.D] === "Supertails_SDD" && ba.getHours() < 13)
+  )
+) {
+  AX = endOfDay(ba);
+}
+
+// SDD – next day
+else if (
+  AW === "SDD Delivery" &&
+  ["Supertails-Varthur", "Supertails_SDD"].includes(r[IDX.D])
+) {
+  AX = endOfDay(addDays(ba, 1));
+}
+
+// SF Previous
+else if (
+  AW === "SF Previous" &&
+  ["Supertail_Hyperlocal", "Supertails-Varthur"].includes(r[IDX.D])
+) {
+  if (ba.getHours() >= 20) {
+    AX = addDays(dateOnly(ba), 1);
+    AX.setHours(13, 0, 0, 0);
+  } else {
+    AX = dateOnly(ba);
+    AX.setHours(13, 0, 0, 0);
+  }
+}
+
+// 2 Hours Delivery
+else if (
+  AW === "2 Hours Delivery" &&
+  ["Supertail_Hyperlocal", "Supertails-Varthur"].includes(r[IDX.D])
+) {
+  AX = bb;
+}
+
+// Warehouse – same day
+else if (AW === "Warehouse Order" && ba.getHours() < 11) {
+  AX = endOfDay(ba);
+}
+
+// Warehouse – next day
+else if (AW === "Warehouse Order") {
+  AX = endOfDay(addDays(ba, 1));
+}
+
 
     let AY=parseDateSafe(r[IDX.AL])>AX?"SLA BREACH":"SLA MET";
     let AZ=ba?excelTime(ba-new Date(ba.toDateString())):"";
