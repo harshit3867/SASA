@@ -258,14 +258,13 @@ tfoot td{
 <div class="card">
     <div class="title">Store Pendancy</div>
 
-    <div class="controls">
-    <input type="file" id="zipFile" accept=".zip">
+<div class="controls">
+  <input type="file" id="zipFile" accept=".zip">
 
 <button class="download-btn"
-  onclick="downloadAllPNGs()">
-  Download ALL Reports
-</button>
-
+    onclick="downloadAllPNGs()">
+    Download ALL Images
+  </button>
 </div>
 
     <div id="reportContainer">
@@ -291,6 +290,9 @@ const ALLOWED_STORES=[
 "DEL_malviya-nagar","HYD_manikonda","MUM_andheri","BLR_kalyan-nagar",
 "BLR_koramangala","CH_Periyamet","KOL-Topsia","PUN_koregaon-park"
 ];
+// ===== EXCEL DATA STORAGE (STORE WISE) =====
+const detailsByStore = {};
+ALLOWED_STORES.forEach(s => detailsByStore[s] = []);
 
 const ALLOWED_STATUS=["Attempted Delivery","Not Dispatched"];
 
@@ -325,6 +327,8 @@ function buildPivot(data) {
     document.getElementById("tableContainer").innerHTML = "";
     window.__ALL_TABLE_BOXES = [];
 
+    ALLOWED_STORES.forEach(s => detailsByStore[s] = []);
+
     const pivot = {};
 
     data.forEach(row => {
@@ -341,6 +345,8 @@ function buildPivot(data) {
         const dateCol = Object.keys(row)[13];
         const date = extractDate(row[dateCol]);
         if (!date) return;
+// ✅ SAVE RAW ROW FOR STORE-WISE EXCEL
+detailsByStore[store].push(row);
 
         pivot[store] ??= {};
         pivot[store][date] ??= {
@@ -370,33 +376,40 @@ function renderStoreTable(p, storeName){
     window.__ALL_TABLE_BOXES = window.__ALL_TABLE_BOXES || [];
     window.__ALL_TABLE_BOXES.push({ boxId, clientName: storeName });
 
-    let h = `
-    <div style="display:flex; justify-content:flex-end; margin-top:40px">
-      <button class="download-btn"
-        onclick="downloadPNG('${boxId}', '${storeName}')">
-        Download PNG
-      </button>
+let h = `
+<div style="display:flex; justify-content:flex-end; gap:8px; margin-top:40px">
+  <button class="download-btn"
+    onclick="downloadPNG('${boxId}', '${storeName}')">
+    Download PNG
+  </button>
+
+  <button class="download-btn"
+    style="background:linear-gradient(135deg,#F59E0B,#D97706)"
+    onclick="downloadStoreExcel('${storeName}')">
+    Download Excel
+  </button>
+</div>
+
+<div id="${boxId}" style="margin-top:10px; position:relative">
+
+  <div class="table-header-bar">
+    <div class="table-header-title">
+      ${storeName} – Order Pendancy
     </div>
+  </div>
 
-    <div id="${boxId}" style="margin-top:10px; position:relative">
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Attempted Delivery</th>
+        <th>Not Dispatched</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
 
-      <div class="table-header-bar">
-        <div class="table-header-title">
-          ${storeName} – Order Pendancy
-        </div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Attempted Delivery</th>
-            <th>Not Dispatched</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
 
     Object.keys(p)
   .sort((a, b) => {
@@ -457,6 +470,24 @@ function downloadPNG(boxId, clientName) {
         link.click();
     });
 }
+function downloadStoreExcel(storeName) {
+  const rows = detailsByStore[storeName];
+  if (!rows || rows.length === 0) {
+    alert("No data available for Excel");
+    return;
+  }
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Order Details");
+
+  XLSX.writeFile(
+    workbook,
+    `${storeName}_Order_Details.xlsx`
+  );
+}
+
 function downloadAllPNGs() {
   document.body.classList.remove("blur-active");
 
