@@ -12,134 +12,55 @@ body{
   font-family:Segoe UI,sans-serif;
   background:
     linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),
-    url("Zippee.png") no-repeat center center fixed;
+    url("zippee.png") no-repeat center center fixed;
   background-size:cover;
   color:#fff;
 }
+.header{text-align:center;padding:14px;font-size:22px;font-weight:700}
+.container{width:95%;margin:auto}
 
-.header{
-  text-align:center;
-  padding:14px;
-  font-size:22px;
-  font-weight:700;
-}
-
-.container{
-  width:95%;
-  margin:auto;
-}
-
-/* INPUT */
 .store-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:10px;
 }
+.store-card{background:#2f4b66;padding:8px;border-radius:8px}
+.store-title{font-size:13px;font-weight:700;margin-bottom:4px;text-align:center}
+textarea{width:100%;height:80px;border:none;border-radius:6px;padding:6px;font-size:12px}
 
-.store-card{
-  background:#2f4b66;
-  padding:8px;
-  border-radius:8px;
-}
+button{border:none;border-radius:6px;cursor:pointer;font-weight:700}
+.action-btn{background:#0d6efd;color:white;padding:8px 18px}
+.download-btn{background:#16a34a;color:white;padding:8px 16px}
 
-.store-title{
-  font-size:13px;
-  font-weight:700;
-  margin-bottom:4px;
-  text-align:center;
-}
-
-textarea{
-  width:100%;
-  height:80px;
-  border:none;
-  border-radius:6px;
-  padding:6px;
-  font-size:12px;
-}
-
-/* BUTTONS */
-button{
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:700;
-}
-
-.action-btn{
-  background:#0d6efd;
-  color:white;
-  padding:8px 18px;
-}
-
-.download-btn{
-  background:#16a34a;
-  color:white;
-  padding:8px 16px;
-}
-
-/* ===== REPORT (20 CM MAX) ===== */
 .report{
   background:white;
   color:black;
   padding:12px;
   border-radius:8px;
   margin:20px auto;
-  max-width:20cm;        /* 🔒 HARD LIMIT */
+  max-width:20cm;
 }
+.report-title{text-align:center;font-size:18px;font-weight:700}
+.report-time{text-align:center;font-size:13px;margin:4px 0 8px}
 
-.report-title{
-  text-align:center;
-  font-size:18px;
-  font-weight:700;
-}
-
-.report-time{
-  text-align:center;
-  font-size:13px;
-  margin:4px 0 8px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  table-layout:auto;
-}
-
+table{width:100%;border-collapse:collapse}
 th,td{
   padding:4px 6px;
   font-size:13px;
   border-bottom:1px solid #ddd;
-  text-align:center;     /* 🔒 CENTER EVERYTHING */
+  text-align:center;
   white-space:nowrap;
 }
+th{background:#c55a11;color:white;font-weight:700}
+.total-row td{background:#f2f2f2;font-weight:700}
 
-th{
-  background:#c55a11;
-  color:white;
-  font-weight:700;
-}
-
-.total-row td{
-  background:#f2f2f2;
-  font-weight:700;
-}
-
-/* BF conditional */
 .bf-green{background:#dcfce7;color:#166534;font-weight:700}
 .bf-yellow{background:#fef9c3;color:#854d0e;font-weight:700}
 .bf-red{background:#fee2e2;color:#991b1b;font-weight:700}
-
-/* Difference conditional */
 .diff-pos{background:#dcfce7;color:#166534;font-weight:700}
 .diff-neg{background:#fee2e2;color:#991b1b;font-weight:700}
 
-.footer{
-  text-align:center;
-  font-size:11px;
-  margin-top:6px;
-  color:#333;
-}
+.footer{text-align:center;font-size:11px;margin-top:6px;color:#333}
 </style>
 </head>
 
@@ -149,9 +70,25 @@ th{
 
 <div class="container">
 
+<!-- TIME SELECT (12 HOUR FORMAT) -->
 <div style="text-align:center;margin-bottom:10px">
-  <label><b>Select Time:</b></label>
-  <select id="timeSelect"></select>
+  <label><b>Hour:</b></label>
+  <select id="hourSelect"></select>
+
+  <label style="margin-left:8px"><b>Min:</b></label>
+  <select id="minSelect">
+    <option value="">--</option>
+    <option value="00">00</option>
+    <option value="15">15</option>
+    <option value="30">30</option>
+    <option value="45">45</option>
+  </select>
+
+  <label style="margin-left:8px"><b>AM/PM:</b></label>
+  <select id="ampmSelect">
+    <option value="AM">AM</option>
+    <option value="PM">PM</option>
+  </select>
 </div>
 
 <div class="store-grid" id="storeGrid"></div>
@@ -165,7 +102,6 @@ th{
 <div id="report1" class="report" style="display:none">
   <div class="report-title">Active Rider Report</div>
   <div class="report-time" id="time1"></div>
-
   <table>
     <thead>
       <tr>
@@ -178,14 +114,12 @@ th{
     </thead>
     <tbody id="body1"></tbody>
   </table>
-
   <div class="footer"><b>Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee</b></div>
 </div>
 
 <!-- REPORT 2 -->
 <div id="report2" class="report" style="display:none">
   <div class="report-title" id="title2"></div>
-
   <table>
     <thead>
       <tr>
@@ -197,7 +131,6 @@ th{
     </thead>
     <tbody id="body2"></tbody>
   </table>
-
   <div class="footer"><b>Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee</b></div>
 </div>
 
@@ -209,19 +142,24 @@ th{
 </div>
 
 <script>
-/* TIME */
-const times=[
-"12:00 AM","1:00 AM","2:00 AM","3:00 AM","4:00 AM","5:00 AM",
-"6:00 AM","7:00 AM","8:00 AM","9:00 AM","10:00 AM","11:00 AM",
-"12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM",
-"6:00 PM","7:00 PM","8:00 PM","9:00 PM","10:00 PM"
-];
-const ts=document.getElementById("timeSelect");
-times.forEach(t=>ts.add(new Option(t,t)));
-const n=new Date();
-ts.value=`${n.getHours()%12||12}:00 ${n.getHours()<12?"AM":"PM"}`;
+/* ===== TIME SETUP (12 HOUR) ===== */
+const hourSel=document.getElementById("hourSelect");
+const minSel=document.getElementById("minSelect");
+const ampmSel=document.getElementById("ampmSelect");
 
-/* STORES */
+for(let h=1;h<=12;h++){
+  hourSel.add(new Option(h,h));
+}
+
+/* auto set current time */
+const now=new Date();
+let ch=now.getHours();
+ampmSel.value=ch>=12?"PM":"AM";
+ch=ch%12||12;
+hourSel.value=ch;
+minSel.value="";
+
+/* ===== STORES ===== */
 const stores=[
 "Kalyan Nagar Mnow","Basaveshwar Nagar Mnow","Jakkur Mnow","Begur Mnow",
 "Thyagaraja Nagar Mnow","Brookfield Mnow","Hulimavu Mnow","Sarjapur Road Mnow",
@@ -236,7 +174,7 @@ stores.forEach(s=>{
     </div>`;
 });
 
-/* CSV */
+/* ===== PLANNED CSV ===== */
 let planned={};
 fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ-18de0srb6yUjkIVdVlZkZqzNAPD6XcLC8ZFPckoyAjTLxgpLekUd4KHoX95M2oqZP5ZUF9b19kQ/pub?gid=0&single=true&output=csv")
 .then(r=>r.text())
@@ -249,27 +187,35 @@ fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ-18de0srb6yUjkIVdVlZkZ
   });
 });
 
-/* HELPERS */
+/* ===== HELPERS ===== */
 const bfCls=v=>v>2?"bf-red":v>1.7?"bf-yellow":"bf-green";
 
-/* GENERATE */
+/* ===== GENERATE ===== */
 function generate(){
-  const time=ts.value;
-  time1.innerText=`Time: ${time}`;
-  title2.innerText=`Planned Rider Report – Time: ${time}`;
-  body1.innerHTML=""; body2.innerHTML="";
+  const h=hourSel.value;
+  const m=minSel.value||"00";
+  const ap=ampmSel.value;
 
+  const displayTime=`${h}:${m} ${ap}`;
+  const planTime=`${h}:00 ${ap}`;
+
+  time1.innerText=`Time: ${displayTime}`;
+  title2.innerText=`Planned Rider Report – Time: ${displayTime}`;
+
+  body1.innerHTML=""; body2.innerHTML="";
   let ta=0,ti=0,tp=0,tbf=0,c=0,pp=0,pa=0,pd=0;
 
   stores.forEach(s=>{
     const l=document.getElementById(s).value.split("\n").map(x=>x.trim());
     let a=0,b=0,i=[],u=0;
+
     l.forEach((x,j)=>{
       if(x==="No. of Active Riders") a=+l[j-1]||0;
       if(x==="Banner Factor") b=parseFloat(l[j-1])||0;
       if(x==="In Store") i.push(+l[j+1]||0);
       if(x==="Unassigned") u=+l[j+1]||0;
     });
+
     const idle=i[1]||0,p=(i[0]||0)+u;
     ta+=a;ti+=idle;tp+=p;if(b){tbf+=b;c++}
 
@@ -279,7 +225,8 @@ function generate(){
         <td class="${bfCls(b)}">${b.toFixed(2)}</td>
       </tr>`;
 
-    const pl=planned[s]?.[time]||0,d=a-pl;
+    const pl=planned[s]?.[planTime]||0;
+    const d=a-pl;
     pp+=pl;pa+=a;pd+=d;
 
     body2.innerHTML+=`
@@ -305,7 +252,7 @@ function generate(){
   report2.style.display="block";
 }
 
-/* DOWNLOAD */
+/* ===== DOWNLOAD ===== */
 function downloadSingle(id,name){
   requestAnimationFrame(()=>{
     html2canvas(document.getElementById(id),{scale:4,backgroundColor:"#fff"})
@@ -325,5 +272,3 @@ function downloadBoth(){
 
 </body>
 </html>
-
-
