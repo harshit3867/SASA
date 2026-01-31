@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Active Rider Report</title>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:"Segoe UI",sans-serif;
+  background:
+    linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),
+    url("zippee.png") no-repeat center center fixed;
+  background-size:cover;
+  color:white;
+}
+
+.header{
+  text-align:center;
+  padding:14px;
+  font-size:22px;
+  font-weight:700;
+}
+
+.container{
+  width:95%;
+  max-width:1200px;
+  margin:auto;
+}
+
+.store-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:14px;
+}
+
+.store-card{
+  background:#2f4b66;
+  padding:12px;
+  border-radius:12px;
+}
+
+.store-title{font-weight:700;margin-bottom:6px}
+
+textarea{
+  width:100%;
+  height:90px;
+  border:none;
+  border-radius:8px;
+  padding:8px;
+  font-size:12px;
+}
+
+.metrics{
+  display:flex;
+  justify-content:space-between;
+  margin-top:6px;
+  font-size:12px;
+  font-weight:700;
+}
+
+button{
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.action-btn{
+  display:block;
+  margin:18px auto 10px;
+  padding:10px 22px;
+  background:#0d6efd;
+  color:white;
+  font-size:15px;
+}
+
+/* ===== REPORT (WHITE BG) ===== */
+#reportWrapper{
+  display:none;
+  background:white;
+  color:black;
+  padding:16px;
+  border-radius:10px;
+  margin-top:20px;
+}
+
+.report-title{
+  text-align:center;
+  font-size:20px;
+  font-weight:700;
+}
+
+.report-time{
+  text-align:center;
+  font-size:14px;
+  margin:6px 0 12px;
+}
+
+.final-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.final-table th{
+  background:#c55a11;
+  color:white;
+  padding:8px;
+}
+
+.final-table td{
+  padding:8px;
+  text-align:center;
+  border-bottom:1px solid #ddd;
+}
+
+.total-row td{
+  font-weight:700;
+  background:#f1f1f1;
+}
+
+.download-btn{
+  display:block;
+  margin:14px auto;
+  padding:8px 20px;
+  background:#16a34a;
+  color:white;
+}
+
+.footer{
+  text-align:center;
+  font-size:12px;
+  margin-top:8px;
+  color:#333;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">SASA Automation</div>
+
+<div class="container">
+
+<!-- TIME SELECTOR -->
+<div style="text-align:center;margin-bottom:10px">
+  <label style="font-weight:700">Select Time: </label>
+  <input type="time" id="reportTime" value="11:00">
+</div>
+
+<div class="store-grid" id="storeGrid"></div>
+
+<button class="action-btn" onclick="extractAll()">Extract All Stores</button>
+
+<!-- REPORT (CAPTURED IN PNG) -->
+<div id="reportWrapper">
+  <div class="report-title">Active Rider Report</div>
+  <div class="report-time" id="reportTimeText"></div>
+
+  <table class="final-table">
+    <thead>
+      <tr>
+        <th>Darkstore Name</th>
+        <th>Active Riders</th>
+        <th>Idle Riders</th>
+        <th>Pending Orders</th>
+        <th>BF</th>
+      </tr>
+    </thead>
+    <tbody id="finalBody"></tbody>
+  </table>
+
+  <div class="footer">
+    <b>Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee</b>
+  </div>
+</div>
+
+<!-- DOWNLOAD BUTTON OUTSIDE REPORT -->
+<button class="download-btn" onclick="downloadPNG()">Download as PNG</button>
+
+</div>
+
+<script>
+const stores=[
+"Kalyan Nagar Mnow","Basaveshwar Nagar Mnow","Jakkur Mnow","Begur Mnow",
+"Thyagaraja Nagar Mnow","Brookfield Mnow","Hulimavu Mnow","Sarjapur Road Mnow",
+"Manikonda Mnow","Gachibowli Mnow","Attapur Mnow","Nizampet Mnow"
+];
+
+const grid=document.getElementById("storeGrid");
+const tbody=document.getElementById("finalBody");
+
+stores.forEach(s=>{
+  const id=s.replace(/\s/g,'');
+  grid.innerHTML+=`
+    <div class="store-card">
+      <div class="store-title">${s}</div>
+      <textarea id="txt-${id}" placeholder="Paste dashboard text here..."></textarea>
+      <div class="metrics">
+        <span>AR: <b id="ar-${id}">-</b></span>
+        <span>IR: <b id="ir-${id}">-</b></span>
+        <span>PO: <b id="po-${id}">-</b></span>
+        <span>BF: <b id="bf-${id}">-</b></span>
+      </div>
+    </div>`;
+});
+
+function extractSingle(text){
+  const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
+  let active=0,bf=0,instores=[],unassigned=0;
+
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i].toLowerCase();
+    if(l==="no. of active riders") active=parseInt(lines[i-1])||0;
+    if(l==="banner factor") bf=parseFloat(lines[i-1])||0;
+    if(l==="in store"){
+      const v=parseInt(lines[i+1]);
+      if(!isNaN(v)) instores.push(v);
+    }
+    if(l==="unassigned") unassigned=parseInt(lines[i+1])||0;
+  }
+
+  return{
+    active,
+    idle:instores.length>=2?instores[1]:instores[0]||0,
+    pending:(instores[0]||0)+unassigned,
+    bf
+  };
+}
+
+function extractAll(){
+  tbody.innerHTML="";
+  let tA=0,tI=0,tP=0,tBF=0,c=0;
+
+  const time=document.getElementById("reportTime").value;
+  document.getElementById("reportTimeText").innerText=`Time: ${time}`;
+
+  stores.forEach(s=>{
+    const id=s.replace(/\s/g,'');
+    const d=extractSingle(document.getElementById(`txt-${id}`).value);
+
+    tA+=d.active; tI+=d.idle; tP+=d.pending;
+    if(d.bf){tBF+=d.bf;c++;}
+
+    tbody.innerHTML+=`
+      <tr>
+        <td>${s}</td>
+        <td>${d.active}</td>
+        <td>${d.idle}</td>
+        <td>${d.pending}</td>
+        <td>${d.bf.toFixed(2)}</td>
+      </tr>`;
+  });
+
+  tbody.innerHTML+=`
+    <tr class="total-row">
+      <td>Total</td>
+      <td>${tA}</td>
+      <td>${tI}</td>
+      <td>${tP}</td>
+      <td>${(c?tBF/c:0).toFixed(2)}</td>
+    </tr>`;
+
+  document.getElementById("reportWrapper").style.display="block";
+}
+
+function downloadPNG(){
+  html2canvas(document.getElementById("reportWrapper"),{scale:2})
+    .then(canvas=>{
+      const a=document.createElement("a");
+      a.href=canvas.toDataURL();
+      a.download="Active_Rider_Report.png";
+      a.click();
+    });
+}
+</script>
+
+</body>
+</html>
