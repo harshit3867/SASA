@@ -2,20 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Rider Operations Report</title>
+<title>Rider Reports</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family:"Segoe UI",sans-serif;
+  font-family:Segoe UI,sans-serif;
   background:
     linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),
     url("zippee.png") no-repeat center center fixed;
   background-size:cover;
-  color:white;
+  color:#fff;
 }
 
 .header{
@@ -27,7 +26,6 @@ body{
 
 .container{
   width:95%;
-  max-width:1300px;
   margin:auto;
 }
 
@@ -35,68 +33,71 @@ body{
 .store-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:14px;
+  gap:10px;
 }
 
 .store-card{
   background:#2f4b66;
-  padding:12px;
-  border-radius:12px;
+  padding:8px;
+  border-radius:8px;
 }
 
 .store-title{
+  font-size:13px;
   font-weight:700;
-  margin-bottom:6px;
+  margin-bottom:4px;
+  text-align:center;
 }
 
 textarea{
   width:100%;
-  height:90px;
+  height:80px;
   border:none;
-  border-radius:8px;
-  padding:8px;
+  border-radius:6px;
+  padding:6px;
   font-size:12px;
 }
 
 /* BUTTONS */
 button{
   border:none;
-  border-radius:8px;
+  border-radius:6px;
   cursor:pointer;
   font-weight:700;
 }
 
 .action-btn{
-  padding:10px 24px;
   background:#0d6efd;
   color:white;
+  padding:8px 18px;
 }
 
 .download-btn{
-  padding:10px 18px;
   background:#16a34a;
   color:white;
+  padding:8px 16px;
 }
 
-/* REPORT */
+/* ===== REPORT (20 CM MAX) ===== */
 .report{
   background:white;
   color:black;
-  padding:18px;
-  border-radius:10px;
-  margin-top:20px;
+  padding:12px;
+  border-radius:8px;
+  margin:20px auto;
+  max-width:20cm;        /* 🔒 HARD LIMIT */
 }
 
 .report-title{
   text-align:center;
-  font-size:20px;
+  font-size:18px;
   font-weight:700;
 }
 
 .report-time{
   text-align:center;
-  font-size:14px;
-  margin:6px 0 12px;
+  font-size:13px;
+  margin:4px 0 8px;
 }
 
 table{
@@ -105,47 +106,40 @@ table{
   table-layout:auto;
 }
 
+th,td{
+  padding:4px 6px;
+  font-size:13px;
+  border-bottom:1px solid #ddd;
+  text-align:center;     /* 🔒 CENTER EVERYTHING */
+  white-space:nowrap;
+}
+
 th{
   background:#c55a11;
   color:white;
-  padding:8px;
-}
-
-td{
-  padding:8px;
-  text-align:center;
-  border-bottom:1px solid #ddd;
+  font-weight:700;
 }
 
 .total-row td{
+  background:#f2f2f2;
   font-weight:700;
-  background:#f1f1f1;
 }
 
-.footer{
-  text-align:center;
-  font-size:12px;
-  margin-top:8px;
-  color:#333;
-}
-
-/* Store name column */
-th.store-name,
-td.store-name{
-  white-space:nowrap;
-  padding:8px 10px;
-  width:1%;
-  text-align:left;
-}
-
-/* BF formatting */
+/* BF conditional */
 .bf-green{background:#dcfce7;color:#166534;font-weight:700}
 .bf-yellow{background:#fef9c3;color:#854d0e;font-weight:700}
 .bf-red{background:#fee2e2;color:#991b1b;font-weight:700}
 
-/* Difference formatting */
+/* Difference conditional */
 .diff-pos{background:#dcfce7;color:#166534;font-weight:700}
 .diff-neg{background:#fee2e2;color:#991b1b;font-weight:700}
+
+.footer{
+  text-align:center;
+  font-size:11px;
+  margin-top:6px;
+  color:#333;
+}
 </style>
 </head>
 
@@ -155,97 +149,77 @@ td.store-name{
 
 <div class="container">
 
-<!-- TIME -->
-<div style="text-align:center;margin-bottom:12px">
-  <label style="font-weight:700">Select Time: </label>
+<div style="text-align:center;margin-bottom:10px">
+  <label><b>Select Time:</b></label>
   <select id="timeSelect"></select>
 </div>
 
-<!-- INPUTS -->
 <div class="store-grid" id="storeGrid"></div>
 
-<!-- TOP ACTION BUTTONS -->
-<div style="text-align:center;margin:18px 0">
-  <button class="action-btn" onclick="generateReports()">Generate Reports</button>
+<div style="text-align:center;margin:14px 0">
+  <button class="action-btn" onclick="generate()">Generate Reports</button>
   <button class="download-btn" onclick="downloadBoth()">Download Both Reports</button>
 </div>
 
-<!-- BOTH REPORTS WRAPPER (FOR COMBINED PNG) -->
-<div id="bothReportsWrapper">
+<!-- REPORT 1 -->
+<div id="report1" class="report" style="display:none">
+  <div class="report-title">Active Rider Report</div>
+  <div class="report-time" id="time1"></div>
 
-  <!-- REPORT 1 -->
-  <div id="report1" class="report" style="display:none">
-    <div class="report-title">Active Rider Report</div>
-    <div class="report-time" id="timeText1"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Darkstore Name</th>
+        <th>Active Riders</th>
+        <th>Idle Riders</th>
+        <th>Pending Orders</th>
+        <th>BF</th>
+      </tr>
+    </thead>
+    <tbody id="body1"></tbody>
+  </table>
 
-    <table>
-      <thead>
-        <tr>
-          <th class="store-name">Darkstore Name</th>
-          <th>Active Riders</th>
-          <th>Idle Riders</th>
-          <th>Pending Orders</th>
-          <th>BF</th>
-        </tr>
-      </thead>
-      <tbody id="body1"></tbody>
-    </table>
-
-    <div class="footer">
-      <b>Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee</b>
-    </div>
-  </div>
-
-  <!-- REPORT 2 -->
-  <div id="report2" class="report" style="display:none">
-    <div class="report-title" id="title2"></div>
-
-    <table>
-      <thead>
-        <tr>
-          <th class="store-name">Darkstore Name</th>
-          <th>Planned Riders</th>
-          <th>Active Riders</th>
-          <th>Difference</th>
-        </tr>
-      </thead>
-      <tbody id="body2"></tbody>
-    </table>
-
-    <div class="footer">
-      <b> Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee </b>
-    </div>
-  </div>
-
+  <div class="footer"><b>Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee</b></div>
 </div>
 
-<!-- BOTTOM DOWNLOAD BUTTONS (NOT CAPTURED) -->
-<div style="text-align:center;margin:20px 0 40px">
-  <button class="download-btn" onclick="download('report1','Active_Rider_Report.png')">
-    Download Report 1
-  </button>
-  <button class="download-btn" onclick="download('report2','Planned_Rider_Report.png')">
-    Download Report 2
-  </button>
+<!-- REPORT 2 -->
+<div id="report2" class="report" style="display:none">
+  <div class="report-title" id="title2"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Darkstore Name</th>
+        <th>Planned Riders</th>
+        <th>Active Riders</th>
+        <th>Difference</th>
+      </tr>
+    </thead>
+    <tbody id="body2"></tbody>
+  </table>
+
+  <div class="footer"><b>Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee</b></div>
+</div>
+
+<div style="text-align:center;margin:18px 0">
+  <button class="download-btn" onclick="downloadSingle('report1','Active_Rider_Report.png')">Download Report 1</button>
+  <button class="download-btn" onclick="downloadSingle('report2','Planned_Rider_Report.png')">Download Report 2</button>
 </div>
 
 </div>
 
 <script>
 /* TIME */
-const timeSelect=document.getElementById("timeSelect");
-const hours=[
+const times=[
+"12:00 AM","1:00 AM","2:00 AM","3:00 AM","4:00 AM","5:00 AM",
 "6:00 AM","7:00 AM","8:00 AM","9:00 AM","10:00 AM","11:00 AM",
 "12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM",
-"6:00 PM","7:00 PM","8:00 PM","9:00 PM","10:00 PM"
+"6:00 PM","7:00 PM","8:00 PM"
 ];
-hours.forEach(h=>{
-  const o=document.createElement("option");
-  o.value=h;o.textContent=h;
-  timeSelect.appendChild(o);
-});
-const now=new Date();
-timeSelect.value=`${now.getHours()%12||12}:00 ${now.getHours()<12?"AM":"PM"}`;
+const ts=document.getElementById("timeSelect");
+times.forEach(t=>ts.add(new Option(t,t)));
+const n=new Date();
+ts.value=`${n.getHours()%12||12}:00 ${n.getHours()<12?"AM":"PM"}`;
 
 /* STORES */
 const stores=[
@@ -253,148 +227,101 @@ const stores=[
 "Thyagaraja Nagar Mnow","Brookfield Mnow","Hulimavu Mnow","Sarjapur Road Mnow",
 "Manikonda Mnow","Gachibowli Mnow","Attapur Mnow","Nizampet Mnow"
 ];
-
 const grid=document.getElementById("storeGrid");
 stores.forEach(s=>{
   grid.innerHTML+=`
-  <div class="store-card">
-    <div class="store-title">${s}</div>
-    <textarea id="${s}"></textarea>
-  </div>`;
+    <div class="store-card">
+      <div class="store-title">${s}</div>
+      <textarea id="${s}"></textarea>
+    </div>`;
 });
 
 /* CSV */
-let plannedData={};
+let planned={};
 fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ-18de0srb6yUjkIVdVlZkZqzNAPD6XcLC8ZFPckoyAjTLxgpLekUd4KHoX95M2oqZP5ZUF9b19kQ/pub?gid=0&single=true&output=csv")
 .then(r=>r.text())
 .then(t=>{
   const rows=t.split("\n").map(r=>r.split(","));
-  const headers=rows[0];
+  const h=rows[0];
   rows.slice(1).forEach(r=>{
-    plannedData[r[0]]={};
-    headers.slice(1).forEach((h,i)=>{
-      plannedData[r[0]][h]=parseInt(r[i+1])||0;
-    });
+    planned[r[0]]={};
+    h.slice(1).forEach((x,i)=>planned[r[0]][x]=parseInt(r[i+1])||0);
   });
 });
 
 /* HELPERS */
-function bfClass(bf){
-  if(bf>2) return "bf-red";
-  if(bf>1.7) return "bf-yellow";
-  return "bf-green";
-}
+const bfCls=v=>v>2?"bf-red":v>1.7?"bf-yellow":"bf-green";
 
 /* GENERATE */
-function generateReports(){
-  const time=timeSelect.value;
-  document.getElementById("timeText1").innerText=`Time: ${time}`;
-  document.getElementById("title2").innerText=`Planned Rider Report – Time: ${time}`;
+function generate(){
+  const time=ts.value;
+  time1.innerText=`Time: ${time}`;
+  title2.innerText=`Planned Rider Report – Time: ${time}`;
+  body1.innerHTML=""; body2.innerHTML="";
 
-  const b1=document.getElementById("body1");
-  const b2=document.getElementById("body2");
-  b1.innerHTML=""; b2.innerHTML="";
-
-  let tA=0,tI=0,tP=0,tBF=0,c=0;
-  let pPlan=0,pAct=0,pDiff=0;
+  let ta=0,ti=0,tp=0,tbf=0,c=0,pp=0,pa=0,pd=0;
 
   stores.forEach(s=>{
-    const lines=document.getElementById(s).value.split("\n").map(l=>l.trim());
-    let ar=0,bf=0,inst=[],un=0;
-
-    lines.forEach((l,i)=>{
-      if(l==="No. of Active Riders") ar=parseInt(lines[i-1])||0;
-      if(l==="Banner Factor") bf=parseFloat(lines[i-1])||0;
-      if(l==="In Store") inst.push(parseInt(lines[i+1])||0);
-      if(l==="Unassigned") un=parseInt(lines[i+1])||0;
+    const l=document.getElementById(s).value.split("\n").map(x=>x.trim());
+    let a=0,b=0,i=[],u=0;
+    l.forEach((x,j)=>{
+      if(x==="No. of Active Riders") a=+l[j-1]||0;
+      if(x==="Banner Factor") b=parseFloat(l[j-1])||0;
+      if(x==="In Store") i.push(+l[j+1]||0);
+      if(x==="Unassigned") u=+l[j+1]||0;
     });
+    const idle=i[1]||0,p=(i[0]||0)+u;
+    ta+=a;ti+=idle;tp+=p;if(b){tbf+=b;c++}
 
-    const idle=inst[1]||0;
-    const pending=(inst[0]||0)+un;
+    body1.innerHTML+=`
+      <tr>
+        <td>${s}</td><td>${a}</td><td>${idle}</td><td>${p}</td>
+        <td class="${bfCls(b)}">${b.toFixed(2)}</td>
+      </tr>`;
 
-    tA+=ar;tI+=idle;tP+=pending;
-    if(bf){tBF+=bf;c++;}
+    const pl=planned[s]?.[time]||0,d=a-pl;
+    pp+=pl;pa+=a;pd+=d;
 
-    b1.innerHTML+=`
-    <tr>
-      <td class="store-name">${s}</td>
-      <td>${ar}</td>
-      <td>${idle}</td>
-      <td>${pending}</td>
-      <td class="${bfClass(bf)}">${bf.toFixed(2)}</td>
-    </tr>`;
-
-    const planned=plannedData[s]?.[time]||0;
-    const diff=ar-planned;
-
-    pPlan+=planned;pAct+=ar;pDiff+=diff;
-
-    b2.innerHTML+=`
-    <tr>
-      <td class="store-name">${s}</td>
-      <td>${planned}</td>
-      <td>${ar}</td>
-      <td class="${diff>0?"diff-pos":diff<0?"diff-neg":""}">${diff}</td>
-    </tr>`;
+    body2.innerHTML+=`
+      <tr>
+        <td>${s}</td><td>${pl}</td><td>${a}</td>
+        <td class="${d>0?"diff-pos":d<0?"diff-neg":""}">${d}</td>
+      </tr>`;
   });
 
-  b1.innerHTML+=`
-  <tr class="total-row">
-    <td class="store-name">Total</td>
-    <td>${tA}</td>
-    <td>${tI}</td>
-    <td>${tP}</td>
-    <td class="${bfClass(tBF/c)}">${(tBF/c).toFixed(2)}</td>
-  </tr>`;
+  body1.innerHTML+=`
+    <tr class="total-row">
+      <td>Total</td><td>${ta}</td><td>${ti}</td><td>${tp}</td>
+      <td class="${bfCls(tbf/c)}">${(tbf/c).toFixed(2)}</td>
+    </tr>`;
 
-  b2.innerHTML+=`
-  <tr class="total-row">
-    <td class="store-name">Total</td>
-    <td>${pPlan}</td>
-    <td>${pAct}</td>
-    <td class="${pDiff>0?"diff-pos":pDiff<0?"diff-neg":""}">${pDiff}</td>
-  </tr>`;
+  body2.innerHTML+=`
+    <tr class="total-row">
+      <td>Total</td><td>${pp}</td><td>${pa}</td>
+      <td class="${pd>0?"diff-pos":pd<0?"diff-neg":""}">${pd}</td>
+    </tr>`;
 
-  document.getElementById("report1").style.display="block";
-  document.getElementById("report2").style.display="block";
+  report1.style.display="block";
+  report2.style.display="block";
 }
 
 /* DOWNLOAD */
-function download(id,name){
-  html2canvas(document.getElementById(id),{scale:4,useCORS:true}).then(c=>{
-    const a=document.createElement("a");
-    a.href=c.toDataURL();
-    a.download=name;
-    a.click();
-  });
-}
-
-function downloadBoth(){
-  // Download Report 1
-  html2canvas(document.getElementById("report1"),{
-    scale:4,
-    useCORS:true
-  }).then(canvas1=>{
-    const a1=document.createElement("a");
-    a1.href=canvas1.toDataURL("image/png");
-    a1.download="Active_Rider_Report.png";
-    a1.click();
-
-    // After first download, download Report 2
-    html2canvas(document.getElementById("report2"),{
-      scale:4,
-      useCORS:true
-    }).then(canvas2=>{
-      const a2=document.createElement("a");
-      a2.href=canvas2.toDataURL("image/png");
-      a2.download="Planned_Rider_Report.png";
-      a2.click();
+function downloadSingle(id,name){
+  requestAnimationFrame(()=>{
+    html2canvas(document.getElementById(id),{scale:4,backgroundColor:"#fff"})
+    .then(c=>{
+      const a=document.createElement("a");
+      a.href=c.toDataURL("image/png");
+      a.download=name;
+      a.click();
     });
   });
 }
-
+function downloadBoth(){
+  downloadSingle("report1","Active_Rider_Report.png");
+  setTimeout(()=>downloadSingle("report2","Planned_Rider_Report.png"),700);
+}
 </script>
 
 </body>
 </html>
-
