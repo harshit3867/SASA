@@ -182,7 +182,7 @@ function detectCity(h){
     if(h.includes("mor")||h.includes("mrd")) return {city:"Moradabad",manager:"Sanjay"};
     if(h.includes("alb")||h.includes("pray")||h.includes("prg")||h.includes("fkl_var_raj")||h.includes("fkl_ahd_nai_3pl_g_02_grocery"))
         return {city:"Prayagraj",manager:"Vijay"};
-    if(h.includes("sil")||h.includes("slg")) return {city:"Siliguri",manager:"Tanmoy"};
+    if(h.includes("sil")||h.includes("slg")||h.includes("fkl_mal_mou")) return {city:"Siliguri",manager:"Tanmoy"};
     if(h.includes("sur")||h.includes("str")||h.includes("fkl_ahm_bav")) return {city:"Surat",manager:"Umesh"};
     return {city:h,manager:"Unknown"};
 }
@@ -504,3 +504,4 @@ document.addEventListener("keydown", function(e){
 
 </body>
 </html>
+
