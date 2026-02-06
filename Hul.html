@@ -143,7 +143,7 @@ th{
 <!-- HEADER -->
 <div class="header">
     <h1>Zippee – Report</h1>
-    <img class="logo" src="https://i.imgur.com/7yUVE8U.png">
+    <img class="logo" src="SASA.png">
 </div>
 
 <!-- CARD -->
@@ -227,8 +227,16 @@ function processFiles() {
                     }
 
                     const key = orderStatus + "|||" + itemStatus + "|||" + orderDate;
-                    if (!pivotMap[key]) pivotMap[key] = new Set();
-                    pivotMap[key].add(displayOrder);
+                    if (!pivotMap[key]) {
+    pivotMap[key] = {
+        uniqueOrders: new Set(),
+        lineItems: 0
+    };
+}
+
+pivotMap[key].uniqueOrders.add(displayOrder);
+pivotMap[key].lineItems++;
+
                 });
             });
 
@@ -264,7 +272,8 @@ function renderTable(pivotMap) {
 
     sortedKeys.forEach((key, index) => {
         const [status,item,date] = key.split("|||");
-        const count = pivotMap[key].size;
+        const uniqueCount = pivotMap[key].uniqueOrders.size;
+const lineCount = pivotMap[key].lineItems;
 
         // 🔁 Sale Order Status changed → insert subtotal + reset item
         if (lastStatus !== null && status !== lastStatus) {
@@ -284,7 +293,7 @@ tbody.appendChild(subtotalRow);
             lastItemStatus = null; // reset item group
         }
 
-        statusTotal += count;
+        statusTotal += lineCount;
 
 const showStatus = status !== lastStatus;
 const showItem = showStatus || item !== lastItemStatus;
@@ -304,7 +313,7 @@ tr.innerHTML = `
     ${statusCell}
     ${itemCell}
     <td>${date}</td>
-    <td>${count}</td>
+    <td>${lineCount}</td>
 `;
 tbody.appendChild(tr);
 
