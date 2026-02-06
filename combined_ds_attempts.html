@@ -162,6 +162,17 @@ body::before{
 table{
     border-radius:0 0 12px 12px;
 }
+#clientFilter{
+    background:#111;     /* black */
+    color:#fff;          /* white text */
+    border:1px solid #333;
+}
+
+/* dropdown items */
+#clientFilter option{
+    background:#111;
+    color:#fff;
+}
 
 .watermark span{
     font-size:44px;
@@ -259,6 +270,10 @@ tfoot td{
     <div class="title">Store Pendancy</div>
 
 <div class="controls">
+    <select id="clientFilter" class="button">
+    <option value="ALL">All Clients</option>
+</select>
+
   <input type="file" id="zipFile" accept=".zip">
 
   
@@ -288,6 +303,30 @@ Download Report
 </div>
 
 <script>
+    let FULL_DATA = [];
+    let CLIENT_COLUMN = "";
+    document
+.getElementById("clientFilter")
+.addEventListener("change", function(){
+
+const selectedClient = this.value;
+
+// If ALL → show full data
+if(selectedClient === "ALL"){
+    buildPivot(FULL_DATA);
+    return;
+}
+
+// Otherwise filter
+const filteredData = FULL_DATA.filter(row =>
+    row[CLIENT_COLUMN]?.trim().toUpperCase() === selectedClient
+);
+
+buildPivot(filteredData);
+
+});
+
+
 const ALLOWED_STORES=[
 "DEL_malviya-nagar","HYD_manikonda","MUM_andheri","BLR_kalyan-nagar",
 "BLR_koramangala","CH_Periyamet","KOL-Topsia","PUN_koregaon-park"
@@ -307,13 +346,20 @@ document.getElementById("zipFile").addEventListener("change", async e=>{
         if(f.endsWith(".csv")){
             Papa.parse(await zip.files[f].async("text"),{
                 header:true,skipEmptyLines:true,
-                complete:r=>buildPivot(r.data)
+                complete:r=>{
+    FULL_DATA = r.data;
+    populateClientFilter(r.data);
+    buildPivot(r.data);
+}
             });
             break;
         }
         if(f.endsWith(".xlsx")){
             const wb=XLSX.read(await zip.files[f].async("arraybuffer"),{type:"array"});
-            buildPivot(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""}));
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
+FULL_DATA = json;
+populateClientFilter(json);
+buildPivot(json);
             break;
         }
     }
@@ -334,7 +380,13 @@ function buildPivot(data) {
         const store = row["Order Dark Store"];
         if (!ALLOWED_STORES.includes(store)) return;
         
-        let attempts = Number(row["No. of Attempts"] ?? row["No. Of Attempts"]);
+        let attempts = parseInt(
+    (row["No. of Attempts"] ?? row["No. Of Attempts"] ?? "0")
+        .toString()
+        .trim(),
+    10
+);
+
 if (isNaN(attempts)) attempts = 0;
 
         // Status
@@ -358,6 +410,36 @@ detailsByStore[store].push(row);
 renderMasterTable(pivot);
 
 }
+function populateClientFilter(data){
+
+if(!data.length) return;
+
+CLIENT_COLUMN = Object.keys(data[0])
+.find(k => k.trim().toLowerCase() === "client name");
+
+if(!CLIENT_COLUMN){
+    alert("Client Name column not found!");
+    return;
+}
+
+const clients = [...new Set(
+    data.map(r => 
+    r[CLIENT_COLUMN]?.trim().toUpperCase()
+).filter(Boolean)
+)].sort();
+
+
+const dropdown = document.getElementById("clientFilter");
+
+dropdown.innerHTML =
+'<option value="ALL">All Clients</option>';
+
+clients.forEach(client=>{
+    dropdown.innerHTML +=
+    `<option value="${client}">${client}</option>`;
+});
+
+}
 
 
 function renderMasterTable(pivot){
@@ -374,7 +456,10 @@ let h = `
 
 <div class="table-header-bar">
   <div class="table-header-title">
-    All Darkstores – Order Pendancy
+    ${document.getElementById("clientFilter").value === "ALL"
+ ? "All Clients"
+ : document.getElementById("clientFilter").value}
+ – Order Pendancy
   </div>
 </div>
 
