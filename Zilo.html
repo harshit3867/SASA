@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SLA Control Tower</title>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+:root{ --primary:#003f8c; }
+
+body{
+    margin:0;
+    font-family:"Segoe UI",Arial;
+    background:linear-gradient(135deg,#eef2f7,#d9e2ec);
+}
+
+.header{
+    background:linear-gradient(90deg,#003f8c,#0059b3);
+    color:white;
+    padding:20px 40px;
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+
+.card{
+    background:white;
+    margin:40px auto;
+    max-width:1700px;
+    padding:45px;
+    border-radius:18px;
+    box-shadow:0 25px 60px rgba(0,0,0,.12);
+}
+
+.controls{
+    margin-bottom:25px;
+}
+
+select, input[type="file"]{
+    padding:10px;
+    margin-right:10px;
+    border-radius:8px;
+    border:1px solid #ccd6e0;
+}
+
+.button{
+    background:#0A66C2;
+    border:none;
+    border-radius:10px;
+    padding:11px 18px;
+    color:white;
+    cursor:pointer;
+    font-weight:700;
+    margin-left:6px;
+    box-shadow:0 6px 14px rgba(10,102,194,.25);
+    transition:.2s;
+}
+
+.button:hover{
+    transform:translateY(-2px);
+}
+
+/* PREMIUM REPORT BOX */
+#captureBox{
+    background:white;
+    padding:35px 45px;
+    border-radius:14px;
+    box-shadow:0 18px 45px rgba(0,0,0,.10);
+    border:1px solid #e6ecf2;
+}
+
+.report-title{
+    text-align:center;
+    font-weight:900;
+    font-size:30px;
+    margin-bottom:6px;
+    letter-spacing:.4px;
+}
+
+.report-subtitle{
+    text-align:center;
+    font-size:14px;
+    margin-bottom:30px;
+    font-weight:600;
+    color:#555;
+}
+
+.footer{
+    text-align:center;
+    font-weight:700;
+    margin-top:18px;
+    font-size:13px;
+    color:#444;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+th,td{
+    border:1px solid #d6dee6;
+    padding:10px;
+    font-size:14px;
+    text-align:center;
+}
+
+th{
+    background:#f1f5f9;
+    font-weight:800;
+}
+
+.row-head{
+    font-weight:700;
+    text-align:left;
+    background:#fafbfd;
+}
+
+.total-row{
+    font-weight:900;
+    background:#eef4fb;
+}
+
+.data-wrapper{
+    margin-top:50px;
+}
+
+.scroll{
+    overflow:auto;
+    max-height:520px;
+    border-radius:12px;
+    border:1px solid #e3eaf2;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    SLA Control Tower
+</div>
+
+<div class="card">
+
+<div class="controls">
+<select id="locationSelect">
+<option value="Malad">Malad</option>
+<option value="Ghatkopar">Ghatkopar</option>
+<option value="Andheri">Andheri</option>
+<option value="Powai">Powai</option>
+</select>
+
+<input type="file" id="fileInput">
+
+<button class="button" onclick="downloadImage()">Download SLA PNG</button>
+<button class="button" onclick="downloadExcel()">Download Master Excel</button>
+</div>
+
+<!-- SLA REPORT -->
+<div id="captureBox">
+<div class="report-title" id="reportTitle"></div>
+<div class="report-subtitle" id="generationTime"></div>
+<table id="slaTable"></table>
+<div class="footer">Powered by SASA Automation | Harshit Saini – Data Analyst</div>
+</div>
+
+<!-- FULL DATA -->
+<div class="data-wrapper">
+<div class="report-title" style="font-size:24px;">MASTER OPS DATASET</div>
+<div class="scroll">
+<table id="fullTable"></table>
+</div>
+</div>
+
+</div>
+
+<script>
+let rawData = [];
+let processed = [];
+
+//----------------------------------
+// TIME FORMATTER
+//----------------------------------
+
+function minutesToHHMMSS(mins){
+    if(mins === null || mins === undefined) return "";
+
+    const sign = mins < 0 ? "-" : "";
+    const abs = Math.abs(mins);
+
+    const hours = Math.floor(abs/60);
+    const minutes = abs%60;
+
+    return sign +
+        String(hours).padStart(2,'0') + ":" +
+        String(minutes).padStart(2,'0') + ":00";
+}
+
+//----------------------------------
+// AUTO TITLE + GENERATION TIME
+//----------------------------------
+
+function setReportHeader(){
+    const location = document.getElementById("locationSelect").value;
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2,'0');
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const month = monthNames[now.getMonth()];
+    const year = String(now.getFullYear()).slice(-2);
+
+    const time = now.toLocaleTimeString("en-IN", {
+        hour:'2-digit',
+        minute:'2-digit',
+        second:'2-digit'
+    });
+
+    document.getElementById("reportTitle").textContent =
+        `Zilo- ${location} Report - ${day} ${month} ${year}`;
+
+    document.getElementById("generationTime").textContent =
+        `Generated at: ${time}`;
+}
+
+setReportHeader();
+document.getElementById("locationSelect").addEventListener("change", setReportHeader);
+
+//----------------------------------
+// CONSTANTS
+//----------------------------------
+
+const DELAY_BUCKETS = [
+"1. NO BREACH",
+"2. WITHIN 15 MINS OF PROMISE",
+"3. BETWEEN 15-30 MINS OF PROMISE",
+"4. BETWEEN 30-60 MINS OF PROMISE",
+"5. MORE THAN 60 MINS OF PROMISE"
+];
+
+const SERVICES = ["60 min","90 min","Others"];
+
+const tat60=["400024","400029","400042","400043","400055","400059","400070","400071","400072","400075","400076","400077","400078","400079","400083","400084","400086","400087","400089","400096","400047","400053","400058","400060","400062","400063","400064","400066","400067","400069","400090","400091","400092","400093","400095","400097","400101","400102","400103","400104"];
+
+const tat90=["400057","400099","400081","400082","400022","400074","400080","400085","400088","400016","400017","400019","400051","400094","400098","400029","400049","400054","400055","400056","400057","400059","400061","400065"];
+
+//----------------------------------
+// TIME PARSER
+//----------------------------------
+
+function extractMinutes(value){
+    if(!value) return null;
+
+    if(!isNaN(value)){
+        return Math.round(parseFloat(value)*1440);
+    }
+
+    const match = String(value).match(/(\d{1,2}):(\d{2})/);
+    if(match){
+        return (+match[1]*60)+(+match[2]);
+    }
+
+    return null;
+}
+
+//----------------------------------
+// FILE LOAD
+//----------------------------------
+
+document.getElementById("fileInput").addEventListener("change", function(e){
+
+    const file = e.target.files[0];
+    if(!file) return;
+
+    setReportHeader();
+
+    if(file.name.toLowerCase().endsWith("csv")){
+        Papa.parse(file,{
+            header:true,
+            skipEmptyLines:true,
+            complete:(res)=>{
+                rawData = res.data;
+                buildColumns();
+                generateSLA();
+                renderFullTable();
+            }
+        });
+    }
+    else{
+        const reader = new FileReader();
+        reader.onload = function(evt){
+            const wb = XLSX.read(evt.target.result,{type:'binary'});
+            const sheet = wb.Sheets[wb.SheetNames[0]];
+            rawData = XLSX.utils.sheet_to_json(sheet,{raw:false});
+            buildColumns();
+            generateSLA();
+            renderFullTable();
+        };
+        reader.readAsBinaryString(file);
+    }
+});
+
+//----------------------------------
+// BUILD MASTER COLUMNS
+//----------------------------------
+
+function buildColumns(){
+
+    processed = rawData.map(row=>{
+
+        const keys = Object.keys(row);
+
+        const pincode = String(row[keys[8]]||"").slice(-6);
+        const orderCode = String(row[keys[2]]||"").slice(-2).toLowerCase();
+
+        if(orderCode === "pk") return null;
+
+        const EDTmins = extractMinutes(row[keys[14]]);
+        const checkMins = extractMinutes(row[keys[27]]);
+
+        if(EDTmins===null || checkMins===null) return null;
+
+        let service="Others";
+        if(tat60.includes(pincode)) service="60 min";
+        else if(tat90.includes(pincode)) service="90 min";
+
+        const diff = checkMins-EDTmins;
+
+        let orderType="NONE";
+        if(orderCode==="pd") orderType="RTO ORDER";
+
+        const sign=Math.sign(diff);
+        const tatStatus = sign<=0 ? "WITHIN TAT" : "OUTSIDE TAT";
+
+        let bucket;
+        if(diff<=0) bucket="1. NO BREACH";
+        else if(diff<=15) bucket="2. WITHIN 15 MINS OF PROMISE";
+        else if(diff<=30) bucket="3. BETWEEN 15-30 MINS OF PROMISE";
+        else if(diff<=60) bucket="4. BETWEEN 30-60 MINS OF PROMISE";
+        else bucket="5. MORE THAN 60 MINS OF PROMISE";
+
+        return {
+            ...row,
+            "pincode":pincode,
+            "IS RTO ORDER OR PICKED UP":orderType,
+            "EDT":minutesToHHMMSS(EDTmins),
+            "Check Time":minutesToHHMMSS(checkMins),
+            "TAT":minutesToHHMMSS(diff),
+            "Delay":minutesToHHMMSS(diff),
+            "Sign":sign,
+            "TAT STATUS":tatStatus,
+            "SERVICE DURATION BY PINCODES":service,
+            "Delay Category":bucket
+        };
+
+    }).filter(Boolean);
+}
+
+//----------------------------------
+// SLA MATRIX
+//----------------------------------
+
+function generateSLA(){
+
+    const matrix={};
+
+    DELAY_BUCKETS.forEach(b=>{
+        matrix[b]={};
+        SERVICES.forEach(s=>matrix[b][s]=0);
+    });
+
+    const totals={"60 min":0,"90 min":0,"Others":0};
+
+    processed.forEach(r=>{
+        const s=r["SERVICE DURATION BY PINCODES"];
+        const b=r["Delay Category"];
+        matrix[b][s]++;
+        totals[s]++;
+    });
+
+    renderSLA(matrix,totals);
+}
+
+function pct(val,total){
+    if(!total) return "";
+    return ((val/total)*100).toFixed(2)+"%";
+}
+
+function renderSLA(matrix,totals){
+
+    const t=document.getElementById("slaTable");
+
+    let header=`
+<tr>
+<th rowspan="2">SERVICE DURATION BY PINCODES</th>
+<th colspan="2">60 min</th>
+<th colspan="2">90 min</th>
+<th colspan="2">Others</th>
+<th colspan="2">Total</th>
+</tr>
+<tr>
+<th>Total Orders</th><th>SLA %</th>
+<th>Total Orders</th><th>SLA %</th>
+<th>Total Orders</th><th>SLA %</th>
+<th>Total Orders</th><th>SLA %</th>
+</tr>`;
+
+    let rows="";
+
+    DELAY_BUCKETS.forEach(bucket=>{
+
+        const s60=matrix[bucket]["60 min"];
+        const s90=matrix[bucket]["90 min"];
+        const oth=matrix[bucket]["Others"];
+
+        const rowTotal=s60+s90+oth;
+        const grand=totals["60 min"]+totals["90 min"]+totals["Others"];
+
+        rows+=`
+<tr>
+<td class="row-head">${bucket}</td>
+<td>${s60||""}</td><td>${pct(s60,totals["60 min"])}</td>
+<td>${s90||""}</td><td>${pct(s90,totals["90 min"])}</td>
+<td>${oth||""}</td><td>${pct(oth,totals["Others"])}</td>
+<td>${rowTotal}</td><td>${pct(rowTotal,grand)}</td>
+</tr>`;
+    });
+
+    const grandTotal=totals["60 min"]+totals["90 min"]+totals["Others"];
+
+    rows+=`
+<tr class="total-row">
+<td>Total</td>
+<td>${totals["60 min"]}</td><td>100%</td>
+<td>${totals["90 min"]}</td><td>100%</td>
+<td>${totals["Others"]}</td><td>100%</td>
+<td>${grandTotal}</td><td>100%</td>
+</tr>`;
+
+    t.innerHTML=header+rows;
+}
+
+//----------------------------------
+// FULL MASTER TABLE
+//----------------------------------
+
+function renderFullTable(){
+
+    const table=document.getElementById("fullTable");
+
+    if(!processed.length) return;
+
+    const headers=Object.keys(processed[0]);
+
+    let thead="<tr>" + headers.map(h=>`<th>${h}</th>`).join("") + "</tr>";
+
+    let rows=processed.map(r=>{
+        return "<tr>" + headers.map(h=>`<td>${r[h] ?? ""}</td>`).join("") + "</tr>";
+    }).join("");
+
+    table.innerHTML=thead+rows;
+}
+
+//----------------------------------
+// DOWNLOAD SLA IMAGE
+//----------------------------------
+
+function downloadImage(){
+html2canvas(document.getElementById("captureBox"),{scale:2})
+.then(canvas=>{
+    const a=document.createElement("a");
+    a.href=canvas.toDataURL("image/png");
+    a.download="SLA_Report.png";
+    a.click();
+});
+}
+
+//----------------------------------
+// DOWNLOAD MASTER EXCEL
+//----------------------------------
+
+function downloadExcel(){
+
+    if(!processed.length){
+        alert("Upload file first!");
+        return;
+    }
+
+    const location = document.getElementById("locationSelect").value;
+
+    const ws = XLSX.utils.json_to_sheet(processed);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Master Ops Data");
+
+    XLSX.writeFile(wb, `Zilo_${location}_Master_Ops_File.xlsx`);
+}
+
+</script>
+</body>
+</html>
