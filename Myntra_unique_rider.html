@@ -326,6 +326,86 @@ document.getElementById("downloadReport").addEventListener("click", () => {
     });
 });
 </script>
+<script>
+/* ------------- SCREENSHOT / COPY DETERRENCE -------------- */
+
+/* Temporary Blur Overlay */
+function temporarilyBlur() {
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.backdropFilter = "blur(18px)";
+    overlay.style.background = "rgba(255,255,255,0.25)";
+    overlay.style.zIndex = "999999";
+    overlay.style.pointerEvents = "none";
+    document.body.appendChild(overlay);
+    setTimeout(()=> overlay.remove(), 1400);
+}
+
+/* Windows Snipping Tool (Win + Shift + S fallback detection) */
+document.addEventListener("keydown", function(e){
+    if (e.shiftKey && e.metaKey) {
+        temporarilyBlur();
+    }
+
+    if (e.shiftKey && e.key.toLowerCase() === "s") {
+        temporarilyBlur();
+    }
+});
+
+/* Mac Screenshot */
+document.addEventListener("keydown", function(e){
+    if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
+        e.preventDefault();
+        temporarilyBlur();
+        alert("Mac screenshot shortcut blocked.");
+    }
+});
+
+/* Disable right-click, select, copy */
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("selectstart", e => e.preventDefault());
+document.addEventListener("copy", e => {
+    e.preventDefault();
+    alert("Copying is disabled on this page.");
+});
+
+/* ------------- ANTI-INSPECT / DEVTOOLS -------------- */
+
+/* Detect DevTools */
+setInterval(function () {
+  const threshold = 160;
+  if (
+    window.outerWidth - window.innerWidth > threshold ||
+    window.outerHeight - window.innerHeight > threshold
+  ) {
+    document.body.innerHTML =
+      "<h2 style='text-align:center;margin-top:40px;'>Dev Tools are not allowed 🚫</h2>";
+  }
+}, 500);
+
+/* Block Inspect Keys */
+document.addEventListener("keydown", function(e){
+
+  // F12
+  if (e.keyCode === 123) e.preventDefault();
+
+  // Ctrl + Shift + I / J / C
+  if (e.ctrlKey && e.shiftKey &&
+     ['I','J','C','i','j','c'].includes(e.key)) {
+      e.preventDefault();
+  }
+
+  // Ctrl + U
+  if (e.ctrlKey && ['U','u'].includes(e.key)) {
+      e.preventDefault();
+  }
+
+  // Block any Ctrl + Shift combo
+  if (e.ctrlKey && e.shiftKey) e.preventDefault();
+});
+</script>
 
 </body>
 </html>
+
