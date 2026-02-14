@@ -96,6 +96,7 @@ th{background:#c55a11;color:white;font-weight:700}
 <div style="text-align:center;margin:14px 0">
   <button class="action-btn" onclick="generate()">Generate Reports</button>
   <button class="download-btn" onclick="downloadBoth()">Download Both Reports</button>
+  <button class="download-btn" onclick="copySummary()">Copy Active + Idle + BF</button>
 </div>
 
 <!-- REPORT 1 -->
@@ -251,6 +252,28 @@ function generate(){
   report1.style.display="block";
   report2.style.display="block";
 }
+function copySummary(){
+  let text = "";
+
+  stores.forEach(s=>{
+    const l=document.getElementById(s).value.split("\n").map(x=>x.trim());
+    let a=0,b=0,i=[];
+
+    l.forEach((x,j)=>{
+      if(x==="No. of Active Riders") a=+l[j-1]||0;
+      if(x==="Banner Factor") b=parseFloat(l[j-1])||0;
+      if(x==="In Store") i.push(+l[j+1]||0);
+    });
+
+    const idle=i[1]||0;
+
+    text += `${a}\t${idle}\t${b.toFixed(2)}\n`;
+  });
+
+  navigator.clipboard.writeText(text.trim())
+  .then(()=> alert("Copied Successfully ✅"))
+  .catch(()=> alert("Copy failed ❌"));
+}
 
 /* ===== DOWNLOAD ===== */
 function downloadSingle(id,name){
@@ -351,4 +374,3 @@ document.addEventListener("keydown", function(e){
 
 </body>
 </html>
-
