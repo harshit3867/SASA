@@ -130,12 +130,13 @@ body::before{
 .table-header-bar{
     display:flex;
     align-items:center;
-    justify-content:space-between;
+    justify-content:center;
     background:#2f3e46;
     color:white;
     padding:10px 12px;
-    border-radius:0;
     font-weight:800;
+    width:100%;
+    box-sizing:border-box;
 }
 
 .table-header-title{
@@ -148,7 +149,26 @@ body::before{
     display:flex;
     gap:8px;
 }
+.report-note{
+    margin-top:30px;
+    padding:16px;
+    background:rgba(255,255,255,0.6);
+    border-radius:12px;
+    font-size:13px;
+}
 
+.report-note h3{
+    margin-bottom:8px;
+    color:#003f8c;
+}
+
+.report-note ol{
+    padding-left:18px;
+}
+
+.report-note li{
+    margin-bottom:6px;
+}
 /* WATERMARK */
 .watermark{
     position:absolute;
@@ -195,6 +215,7 @@ table{
 /* TABLE */
 .table-wrapper{
     overflow-x:auto;
+    display:inline-block;
 }
 
 table{
@@ -270,8 +291,14 @@ tfoot td{
     <div class="title">Store Pendancy</div>
 
 <div class="controls">
+    <div id="columnCheckboxes" style="display:none; gap:12px; align-items:center; flex-wrap:wrap;">
+  <label><input type="checkbox" value="No. of Attempts" checked> <b>No. of Attempts</b></label>
+  <label><input type="checkbox" value="Attempted Delivery" checked> <b>Attempted Delivery</b></label>
+  <label><input type="checkbox" value="Not Dispatched" checked> <b>Not Dispatched</b></label>
+  <label><input type="checkbox" value="Pickedup" checked><b> Pickedup</b></label>
+</div>
     <select id="clientFilter" class="button">
-    <option value="ALL">All Clients</option>
+    <option value="ALL">Brands</option>
 </select>
 
   <input type="file" id="zipFile" accept=".zip">
@@ -281,33 +308,76 @@ tfoot td{
 onclick="downloadPNG('captureBox','All_Stores')">
 Download Report
 </button>
-
+<button class="download-btn"
+onclick="downloadFilteredExcel()">
+Download Excel
+</button>
 </div>
 
     <div id="reportContainer">
         <div id="captureBox">
-
-            <div class="report-head">
-                <div class="report-title">Attempted vs Not Dispatched vs Picked_up</div>
-                <div class="report-meta" id="meta"></div>
-            </div>
 
             <div class="table-wrapper" id="tableContainer"></div>
 
             <div class="report-footer">
                 Powered by SASA Automation | Harshit Saini - Data Analyst,Zippee
             </div>
-
+<div class="report-note">
+    <h3>Report Logic</h3>
+    <ol>
+        <li>Upload ZIP file containing CSV/XLSX order data.</li>
+        <li>System removes test orders from Column B (testing_*) and Column C (testing_fabbox).</li>
+        <li>Data is filtered by selected Brand (Client Name).</li>
+        <li>Orders are grouped Store-wise and Attempt-wise.</li>
+        <li>Status-wise counts are calculated (Attempted Delivery, Not Dispatched, Pickedup).</li>
+        <li>Grand Total is auto-calculated based on visible columns.</li>
+        <li>Excel export downloads filtered full data.</li>
+        <li>PNG export downloads summarized report view.</li>
+    </ol>
+</div>
         </div>
     </div>
 </div>
 
 <script>
     let FULL_DATA = [];
+    // ===== COLUMN VISIBILITY STATE =====
+let selectedColumns = [
+  "No. of Attempts",
+  "Attempted Delivery",
+  "Not Dispatched",
+  "Pickedup"
+];
     let CLIENT_COLUMN = "";
-    document
+    let COLUMN_B_KEY = "";
+    let COLUMN_C_KEY = "";
+    // ===== CHECKBOX COLUMN FILTER =====
+document
+.getElementById("columnCheckboxes")
+.addEventListener("change", function(){
+
+  selectedColumns = Array.from(
+    this.querySelectorAll("input:checked")
+  ).map(cb => cb.value);
+
+  const selectedClient =
+    document.getElementById("clientFilter").value;
+
+  if(selectedClient === "ALL"){
+    buildPivot(FULL_DATA);
+  } else {
+    const filteredData = FULL_DATA.filter(row =>
+      row[CLIENT_COLUMN]?.trim().toUpperCase()
+      === selectedClient
+    );
+    buildPivot(filteredData);
+  }
+});
+    // ===== COLUMN FILTER LISTENER =====
+        document
 .getElementById("clientFilter")
 .addEventListener("change", function(){
+
 
 const selectedClient = this.value;
 
@@ -337,8 +407,6 @@ ALLOWED_STORES.forEach(s => detailsByStore[s] = []);
 
 const ALLOWED_STATUS=["Attempted Delivery","Not Dispatched","Pickedup"];
 
-document.getElementById("meta").innerText =
-`Date: ${new Date().toLocaleDateString("en-GB")} | Time: ${new Date().toLocaleTimeString()}`;
 
 document.getElementById("zipFile").addEventListener("change", async e=>{
     const zip=await JSZip.loadAsync(e.target.files[0]);
@@ -375,6 +443,16 @@ function buildPivot(data) {
     const pivot = {};
 
     data.forEach(row => {
+        // 🚫 REMOVE TEST ORDERS BASED ON COLUMN B ONLY
+// 🚫 REMOVE TEST ORDERS
+
+// Column B filter (testing_)
+const colB = row[COLUMN_B_KEY]?.toString().trim().toLowerCase();
+if (colB && colB.startsWith("testing_")) return;
+
+// Column C filter (testing_fabbox)
+const colC = row[COLUMN_C_KEY]?.toString().trim().toLowerCase();
+if (colC === "testing_fabbox") return;
 
         // COLUMN D → Store
         const store = row["Order Dark Store"];
@@ -408,11 +486,18 @@ detailsByStore[store].push(row);
         pivot[store][attempts][status]++;
     });
 renderMasterTable(pivot);
+// Show column checkboxes after first render
+document.getElementById("columnCheckboxes").style.display = "flex";
 
 }
 function populateClientFilter(data){
 
 if(!data.length) return;
+
+// Detect Column B (second column in file)
+const headers = Object.keys(data[0]);
+COLUMN_B_KEY = headers[1]; // Column B
+COLUMN_C_KEY = headers[2]; // Column C
 
 CLIENT_COLUMN = Object.keys(data[0])
 .find(k => k.trim().toLowerCase() === "client name");
@@ -432,7 +517,7 @@ const clients = [...new Set(
 const dropdown = document.getElementById("clientFilter");
 
 dropdown.innerHTML =
-'<option value="ALL">All Clients</option>';
+'<option value="ALL">Brands</option>';
 
 clients.forEach(client=>{
     dropdown.innerHTML +=
@@ -443,6 +528,7 @@ clients.forEach(client=>{
 
 
 function renderMasterTable(pivot){
+    window.__LAST_PIVOT__ = pivot;
 
 let g = {
   "Attempted Delivery":0,
@@ -451,15 +537,24 @@ let g = {
 };
 
 let h = `
-
-<div style="margin-top:40px; position:relative">
+<div style="position:relative">
 
 <div class="table-header-bar">
   <div class="table-header-title">
-    ${document.getElementById("clientFilter").value === "ALL"
- ? "All Clients"
- : document.getElementById("clientFilter").value}
- – Order Pendancy
+    <div>
+      ${document.getElementById("clientFilter").value === "ALL"
+        ? "Brands"
+        : document.getElementById("clientFilter").value}
+      Pendancy
+    </div>
+    <div style="font-size:12px; font-weight:500; margin-top:4px;">
+      Generated on: ${new Date().toLocaleDateString("en-GB")} |
+${new Date().toLocaleTimeString("en-US", {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: true
+})}
+    </div>
   </div>
 </div>
 
@@ -467,11 +562,23 @@ let h = `
 <thead>
 <tr>
 <th>Store</th>
-<th>No. of Attempts</th>
-<th>Attempted Delivery</th>
-<th>Not Dispatched</th>
-<th>Pickedup</th>
-<th>Total</th>
+
+${selectedColumns.includes("No. of Attempts")
+  ? "<th>No. of Attempts</th>" : ""}
+
+${selectedColumns.includes("Attempted Delivery")
+  ? "<th>Attempted Delivery</th>" : ""}
+
+${selectedColumns.includes("Not Dispatched")
+  ? "<th>Not Dispatched</th>" : ""}
+
+${selectedColumns.includes("Pickedup")
+  ? "<th>Pickedup</th>" : ""}
+
+${selectedColumns.some(c =>
+  ["Attempted Delivery","Not Dispatched","Pickedup"]
+  .includes(c))
+  ? "<th>Total</th>" : ""}
 </tr>
 </thead>
 <tbody>
@@ -490,11 +597,6 @@ attempts.forEach((attempt, index)=>{
 
     const r = attemptsObj[attempt];
 
-    const total =
-        r["Attempted Delivery"] +
-        r["Not Dispatched"] +
-        r["Pickedup"];
-
     g["Attempted Delivery"] += r["Attempted Delivery"];
     g["Not Dispatched"] += r["Not Dispatched"];
     g["Pickedup"] += r["Pickedup"];
@@ -509,11 +611,26 @@ attempts.forEach((attempt, index)=>{
     }
 
     h += `
-        <td>${attempt} Attempt${attempt==1?"":"s"}</td>
-        <td>${r["Attempted Delivery"]}</td>
-        <td>${r["Not Dispatched"]}</td>
-        <td>${r["Pickedup"]}</td>
-        <td>${total}</td>
+        ${selectedColumns.includes("No. of Attempts")
+  ? `<td>${attempt} Attempt${attempt==1?"":"s"}</td>` : ""}
+
+${selectedColumns.includes("Attempted Delivery")
+  ? `<td>${r["Attempted Delivery"]}</td>` : ""}
+
+${selectedColumns.includes("Not Dispatched")
+  ? `<td>${r["Not Dispatched"]}</td>` : ""}
+
+${selectedColumns.includes("Pickedup")
+  ? `<td>${r["Pickedup"]}</td>` : ""}
+
+${selectedColumns.some(c =>
+  ["Attempted Delivery","Not Dispatched","Pickedup"]
+  .includes(c))
+  ? `<td>${
+      (selectedColumns.includes("Attempted Delivery") ? r["Attempted Delivery"] : 0) +
+      (selectedColumns.includes("Not Dispatched") ? r["Not Dispatched"] : 0) +
+      (selectedColumns.includes("Pickedup") ? r["Pickedup"] : 0)
+    }</td>` : ""}
     </tr>`;
 });
 });
@@ -523,16 +640,28 @@ h += `
 
 <tfoot>
 <tr>
-<td colspan="2" class="total-label">GRAND TOTAL</td>
+<td class="total-label">GRAND TOTAL</td>
 
-<td>${g["Attempted Delivery"]}</td>
-<td>${g["Not Dispatched"]}</td>
-<td>${g["Pickedup"]}</td>
-<td>${
-g["Attempted Delivery"] +
-g["Not Dispatched"] +
-g["Pickedup"]
-}</td>
+${selectedColumns.includes("No. of Attempts")
+  ? "<td></td>" : ""}
+
+${selectedColumns.includes("Attempted Delivery")
+  ? `<td>${g["Attempted Delivery"]}</td>` : ""}
+
+${selectedColumns.includes("Not Dispatched")
+  ? `<td>${g["Not Dispatched"]}</td>` : ""}
+
+${selectedColumns.includes("Pickedup")
+  ? `<td>${g["Pickedup"]}</td>` : ""}
+
+${selectedColumns.some(c =>
+  ["Attempted Delivery","Not Dispatched","Pickedup"]
+  .includes(c))
+  ? `<td>${
+      (selectedColumns.includes("Attempted Delivery") ? g["Attempted Delivery"] : 0) +
+      (selectedColumns.includes("Not Dispatched") ? g["Not Dispatched"] : 0) +
+      (selectedColumns.includes("Pickedup") ? g["Pickedup"] : 0)
+    }</td>` : ""}
 
 </tr>
 </tfoot>
@@ -545,7 +674,97 @@ tableContainer.innerHTML = h;
 }
 
 
+function downloadFilteredExcel(){
 
+  if(!FULL_DATA || FULL_DATA.length === 0){
+    alert("Please upload file first.");
+    return;
+  }
+
+  if(!COLUMN_B_KEY || !COLUMN_C_KEY){
+    alert("File structure not detected properly.");
+    return;
+  }
+
+  const selectedClient =
+    document.getElementById("clientFilter").value;
+
+  const filteredRows = FULL_DATA.filter(row => {
+
+    // Client filter
+    if(selectedClient !== "ALL"){
+      if((row[CLIENT_COLUMN] || "").trim().toUpperCase() !== selectedClient){
+        return false;
+      }
+    }
+
+    // Column B filter
+    const colB = (row[COLUMN_B_KEY] || "")
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    if(colB.startsWith("testing_")) return false;
+
+    // Column C filter
+    const colC = (row[COLUMN_C_KEY] || "")
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    if(colC === "testing_fabbox") return false;
+
+    return true;
+  });
+
+  if(filteredRows.length === 0){
+    alert("No data after filtering.");
+    return;
+  }
+
+  try{
+// Extract only original headers safely
+const headers = Object.keys(FULL_DATA[0]);
+
+const cleanedRows = filteredRows.map(row => {
+  const cleanRow = {};
+  headers.forEach(h => {
+    cleanRow[h] = row[h] ?? "";
+  });
+  return cleanRow;
+});
+
+const worksheet = XLSX.utils.json_to_sheet(cleanedRows);
+const workbook = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Data");
+
+const brand =
+  selectedClient === "ALL" ? "All_Brands" : selectedClient;
+
+// 🔥 Generate binary manually
+const wbout = XLSX.write(workbook, {
+  bookType: "xlsx",
+  type: "array"
+});
+
+// 🔥 Create blob
+const blob = new Blob([wbout], {
+  type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+});
+
+// 🔥 Force download
+const link = document.createElement("a");
+link.href = URL.createObjectURL(blob);
+link.download = `${brand}_Filtered_Data.xlsx`;
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+
+  } catch(error){
+    console.error(error);
+    alert("Excel export failed. Check console.");
+  }
+}
 function downloadPNG(boxId, clientName) {
   document.body.classList.remove("blur-active");
     const element = document.getElementById(boxId);
@@ -627,94 +846,6 @@ function downloadAllPNGs() {
   window.addEventListener("focus", function () {
     document.body.classList.remove("blur-active");
   });
-</script>
-
-<!-- 🔒 ADD BLOCKERS HERE (NEW SCRIPT) -->
-<script>
-  // ============ ANTI-INSPECT + NO DEVTOOLS ============
-/* 🔒 Temporarily blur screen to spoil screenshots */
-function temporarilyBlur() {
-  // Avoid stacking multiple overlays
-  if (document.querySelector(".screenshot-blur-overlay")) return;
-
-  const overlay = document.createElement("div");
-  overlay.className = "screenshot-blur-overlay";
-  document.body.appendChild(overlay);
-
-  // Remove blur after 1.4 seconds
-  setTimeout(() => {
-    overlay.remove();
-  }, 1400);
-}
-
-  // Detect DevTools by window resize gap
-  setInterval(function () {
-    const threshold = 160;
-    if (
-      window.outerWidth - window.innerWidth > threshold ||
-      window.outerHeight - window.innerHeight > threshold
-    ) {
-      document.body.innerHTML =
-        "<h2 style='text-align:center;margin-top:40px;'>Dev Tools are not allowed 🚫</h2>";
-    }
-  }, 500);
-
-  // Disable right-click everywhere
-  document.addEventListener("contextmenu", function(e){
-    e.preventDefault();
-  });
-
-  // Block common inspect keys
-  document.addEventListener("keydown", function(e){
-
-    // F12
-    if (e.keyCode === 123) e.preventDefault();
-
-    // Ctrl + Shift + I / J / C
-    if (e.ctrlKey && e.shiftKey &&
-       ['I','J','C','i','j','c'].includes(e.key)) {
-        e.preventDefault();
-    }
-
-    // Ctrl + U (View Source)
-    if (e.ctrlKey && ['U','u'].includes(e.key)) {
-        e.preventDefault();
-    }
-
-    // Block any Ctrl+Shift combination
-    if (e.ctrlKey && e.shiftKey) e.preventDefault();
-  });
-  /* ================= SCREENSHOT DETECTION (BEST EFFORT) ================= */
-
-// Windows: Win + Shift + S (Snipping Tool)
-document.addEventListener("keydown", function (e) {
-  if (e.shiftKey && e.metaKey) {
-    temporarilyBlur();
-  }
-});
-
-// Fallback: Shift + S (browser sometimes drops metaKey)
-document.addEventListener("keydown", function (e) {
-  if (e.shiftKey && e.key.toLowerCase() === "s") {
-    temporarilyBlur();
-  }
-});
-
-// macOS: Cmd + Shift + 3 / 4
-document.addEventListener("keydown", function (e) {
-  if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
-    e.preventDefault();
-    temporarilyBlur();
-  }
-});
-
-// Print Screen (some browsers expose it)
-document.addEventListener("keyup", function (e) {
-  if (e.key === "PrintScreen") {
-    temporarilyBlur();
-  }
-});
-
 </script>
 
 </body>
