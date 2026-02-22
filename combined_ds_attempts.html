@@ -292,6 +292,15 @@ tfoot td{
 
 <div class="controls">
     <div id="columnCheckboxes" style="display:none; gap:12px; align-items:center; flex-wrap:wrap;">
+  <label style="display:flex; align-items:center; gap:6px; font-weight:700;">
+  <input type="checkbox" id="onTripFilter" checked>
+  On-Trip
+</label>
+
+<label style="display:flex; align-items:center; gap:6px; font-weight:700;">
+  <input type="checkbox" id="cutoff3pmFilter" checked>
+  3PM Cutoff
+</label>
   <label><input type="checkbox" value="No. of Attempts" checked> <b>No. of Attempts</b></label>
   <label><input type="checkbox" value="Attempted Delivery" checked> <b>Attempted Delivery</b></label>
   <label><input type="checkbox" value="Not Dispatched" checked> <b>Not Dispatched</b></label>
@@ -322,24 +331,24 @@ Download Excel
             <div class="report-footer">
                 Powered by SASA Automation | Harshit Saini - Data Analyst,Zippee
             </div>
-<div class="report-note">
-    <h3>Report Logic</h3>
-    <ol>
-        <li>Upload ZIP file containing CSV/XLSX order data.</li>
-        <li>System removes test orders from Column B (testing_*) and Column C (testing_fabbox).</li>
-        <li>Data is filtered by selected Brand (Client Name).</li>
-        <li>Orders are grouped Store-wise and Attempt-wise.</li>
-        <li>Status-wise counts are calculated (Attempted Delivery, Not Dispatched, Pickedup).</li>
-        <li>Grand Total is auto-calculated based on visible columns.</li>
-        <li>Excel export downloads filtered full data.</li>
-        <li>PNG export downloads summarized report view.</li>
-    </ol>
-</div>
         </div>
     </div>
 </div>
-
-<script>
+<div class="card">
+    <div class="report-note">
+        <h3>Report Logic</h3>
+        <ol>
+            <li>Upload ZIP file containing CSV/XLSX order data.</li>
+            <li>System removes test orders from Column B (testing_*) and Column C (testing_fabbox).</li>
+            <li>Data is filtered by selected Brand (Client Name).</li>
+            <li>Orders are grouped Store-wise and Attempt-wise.</li>
+            <li>Status-wise counts are calculated (Attempted Delivery, Not Dispatched, Pickedup).</li>
+            <li>Grand Total is auto-calculated based on visible columns.</li>
+            <li>Excel export downloads filtered full data.</li>
+            <li>PNG export downloads summarized report view.</li>
+        </ol>
+    </div>
+</div><script>
     let FULL_DATA = [];
     // ===== COLUMN VISIBILITY STATE =====
 let selectedColumns = [
@@ -351,6 +360,8 @@ let selectedColumns = [
     let CLIENT_COLUMN = "";
     let COLUMN_B_KEY = "";
     let COLUMN_C_KEY = "";
+    let AI_COLUMN = "";
+    let ORDER_DATE_COLUMN = "";
     // ===== CHECKBOX COLUMN FILTER =====
 document
 .getElementById("columnCheckboxes")
@@ -363,40 +374,31 @@ document
   const selectedClient =
     document.getElementById("clientFilter").value;
 
-  if(selectedClient === "ALL"){
-    buildPivot(FULL_DATA);
-  } else {
-    const filteredData = FULL_DATA.filter(row =>
-      row[CLIENT_COLUMN]?.trim().toUpperCase()
-      === selectedClient
-    );
-    buildPivot(filteredData);
-  }
+  buildPivot(getFilteredData());
 });
     // ===== COLUMN FILTER LISTENER =====
-        document
-.getElementById("clientFilter")
+
+document
+.getElementById("cutoff3pmFilter")
 .addEventListener("change", function(){
-
-
-const selectedClient = this.value;
-
-// If ALL → show full data
-if(selectedClient === "ALL"){
-    buildPivot(FULL_DATA);
-    return;
-}
-
-// Otherwise filter
-const filteredData = FULL_DATA.filter(row =>
-    row[CLIENT_COLUMN]?.trim().toUpperCase() === selectedClient
-);
-
-buildPivot(filteredData);
-
+    buildPivot(getFilteredData());
 });
 
 
+// 🔽 PASTE IT HERE
+document
+.getElementById("onTripFilter")
+.addEventListener("change", function(){
+
+    console.log(
+      "Attempted Delivery after FULL getFilteredData():",
+      getFilteredData().filter(r =>
+        r["Order Status"] === "Attempted Delivery"
+      ).length
+    );
+
+    buildPivot(getFilteredData());
+});
 const ALLOWED_STORES=[
 "DEL_malviya-nagar","HYD_manikonda","MUM_andheri","BLR_kalyan-nagar",
 "BLR_koramangala","CH_Periyamet","KOL-Topsia","PUN_koregaon-park"
@@ -417,7 +419,31 @@ document.getElementById("zipFile").addEventListener("change", async e=>{
                 complete:r=>{
     FULL_DATA = r.data;
     populateClientFilter(r.data);
-    buildPivot(r.data);
+
+    // 🔍 DEBUG CHECK
+    console.log(
+      "Total Attempted Delivery:",
+      FULL_DATA.filter(r => 
+        r["Order Status"] === "Attempted Delivery"
+      ).length
+    );
+
+    console.log(
+      "Attempted Delivery with AI blank:",
+      FULL_DATA.filter(r => 
+        r["Order Status"] === "Attempted Delivery" &&
+        (!r[AI_COLUMN] || r[AI_COLUMN].trim() === "")
+      ).length
+    );
+
+    console.log(
+  "Attempted Delivery after FULL getFilteredData():",
+  getFilteredData().filter(r =>
+    r["Order Status"] === "Attempted Delivery"
+  ).length
+);
+
+    buildPivot(getFilteredData());
 }
             });
             break;
@@ -427,7 +453,7 @@ document.getElementById("zipFile").addEventListener("change", async e=>{
             const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
 FULL_DATA = json;
 populateClientFilter(json);
-buildPivot(json);
+buildPivot(getFilteredData());
             break;
         }
     }
@@ -446,13 +472,7 @@ function buildPivot(data) {
         // 🚫 REMOVE TEST ORDERS BASED ON COLUMN B ONLY
 // 🚫 REMOVE TEST ORDERS
 
-// Column B filter (testing_)
-const colB = row[COLUMN_B_KEY]?.toString().trim().toLowerCase();
-if (colB && colB.startsWith("testing_")) return;
 
-// Column C filter (testing_fabbox)
-const colC = row[COLUMN_C_KEY]?.toString().trim().toLowerCase();
-if (colC === "testing_fabbox") return;
 
         // COLUMN D → Store
         const store = row["Order Dark Store"];
@@ -498,6 +518,10 @@ if(!data.length) return;
 const headers = Object.keys(data[0]);
 COLUMN_B_KEY = headers[1]; // Column B
 COLUMN_C_KEY = headers[2]; // Column C
+AI_COLUMN = headers[34];   // AI column
+ORDER_DATE_COLUMN = headers.find(
+  h => h.trim().toLowerCase() === "order date"
+);
 
 CLIENT_COLUMN = Object.keys(data[0])
 .find(k => k.trim().toLowerCase() === "client name");
@@ -525,7 +549,82 @@ clients.forEach(client=>{
 });
 
 }
+function getFilteredData() {
 
+  const selectedClient =
+    document.getElementById("clientFilter").value;
+
+  const onTripChecked =
+    document.getElementById("onTripFilter").checked;
+
+    const cutoffChecked =
+  document.getElementById("cutoff3pmFilter").checked;
+
+  return FULL_DATA.filter(row => {
+
+    // 🚫 Remove test orders
+    const colB = (row[COLUMN_B_KEY] || "")
+      .toString().trim().toLowerCase();
+
+    if(colB.startsWith("testing_")) return false;
+
+    const colC = (row[COLUMN_C_KEY] || "")
+      .toString().trim().toLowerCase();
+
+    if(colC === "testing_fabbox") return false;
+
+    // 🚫 On-Trip filter
+    const aiValue = (row[AI_COLUMN] || "")
+  .toString().trim();
+
+if(!onTripChecked && aiValue !== ""){
+  return false;
+}
+
+// 🚫 3PM Cutoff filter
+if(cutoffChecked && ORDER_DATE_COLUMN){
+
+  const orderDateStr = row[ORDER_DATE_COLUMN];
+  if(orderDateStr){
+
+    // Parse DD/MM/YYYY HH:MM AM/PM safely
+const [datePart, timePart, ampm] = orderDateStr.split(" ");
+
+const [day, month, year] = datePart.split("/").map(Number);
+let [hours, minutes] = timePart.split(":").map(Number);
+
+if (ampm === "PM" && hours !== 12) hours += 12;
+if (ampm === "AM" && hours === 12) hours = 0;
+
+const orderDate = new Date(year, month - 1, day, hours, minutes);
+
+    const now = new Date();
+    const todayDateStr = now.toDateString();
+
+    if(orderDate.toDateString() === todayDateStr){
+
+      const cutoffTime = new Date();
+      cutoffTime.setHours(15, 0, 0, 0); // 3:00 PM
+
+      if(orderDate > cutoffTime){
+        return false;
+      }
+
+    }
+  }
+}
+
+    // 🚫 Brand filter
+    if(selectedClient !== "ALL"){
+      if((row[CLIENT_COLUMN] || "")
+        .trim().toUpperCase() !== selectedClient){
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
 
 function renderMasterTable(pivot){
     window.__LAST_PIVOT__ = pivot;
@@ -689,33 +788,7 @@ function downloadFilteredExcel(){
   const selectedClient =
     document.getElementById("clientFilter").value;
 
-  const filteredRows = FULL_DATA.filter(row => {
-
-    // Client filter
-    if(selectedClient !== "ALL"){
-      if((row[CLIENT_COLUMN] || "").trim().toUpperCase() !== selectedClient){
-        return false;
-      }
-    }
-
-    // Column B filter
-    const colB = (row[COLUMN_B_KEY] || "")
-      .toString()
-      .trim()
-      .toLowerCase();
-
-    if(colB.startsWith("testing_")) return false;
-
-    // Column C filter
-    const colC = (row[COLUMN_C_KEY] || "")
-      .toString()
-      .trim()
-      .toLowerCase();
-
-    if(colC === "testing_fabbox") return false;
-
-    return true;
-  });
+  const filteredRows = getFilteredData();
 
   if(filteredRows.length === 0){
     alert("No data after filtering.");
