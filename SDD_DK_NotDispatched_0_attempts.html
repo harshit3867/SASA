@@ -257,7 +257,27 @@ tfoot td{
 <div class="card">
     <div class="title">Store Pendancy</div>
 
-<div class="controls">
+<div class="controls" id="controlsSection">
+  <div id="filtersBlock" style="display:none; gap:15px; align-items:center;">
+
+  <label style="display:flex; align-items:center; gap:6px; font-weight:700;">
+    <input type="checkbox" id="onTripFilter" checked>
+    On-Trip
+  </label>
+
+  <label style="font-weight:700;">
+    Attempts:
+    <select id="attemptFilter" style="padding:4px; border-radius:6px;">
+      <option value="all">All</option>
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="gt3">> 3</option>
+    </select>
+  </label>
+
+</div>
   <input type="file" id="zipFile" accept=".zip">
 
 <button class="download-btn"
@@ -296,11 +316,16 @@ const detailsByStore = {};
 ALLOWED_STORES.forEach(s => detailsByStore[s] = []);
 
 const ALLOWED_STATUS=["Not Dispatched"];
+let COLUMN_B_KEY = "";
+let COLUMN_C_KEY = "";
+let AI_COLUMN = ""; 
 
 document.getElementById("meta").innerText =
 `Date: ${new Date().toLocaleDateString("en-GB")} | Time: ${new Date().toLocaleTimeString()}`;
 
 document.getElementById("zipFile").addEventListener("change", async e=>{
+  // 🔄 Rebuild table when Trip filter changes
+
     const zip=await JSZip.loadAsync(e.target.files[0]);
     for(const f of Object.keys(zip.files)){
         if(f.endsWith(".csv")){
@@ -317,7 +342,18 @@ document.getElementById("zipFile").addEventListener("change", async e=>{
         }
     }
 });
-
+// 🔄 Rebuild table when Trip filter changes
+document.getElementById("onTripFilter").addEventListener("change", function () {
+    if (window.__LAST_DATA__) {
+        buildPivot(window.__LAST_DATA__);
+    }
+});
+// 🔄 Rebuild when attempt filter changes
+document.getElementById("attemptFilter").addEventListener("change", function () {
+    if (window.__LAST_DATA__) {
+        buildPivot(window.__LAST_DATA__);
+    }
+});
 const extractDate = v => {
   if (!v) return "";
   return v.toString().substring(3, 13);
@@ -325,6 +361,14 @@ const extractDate = v => {
 
 
 function buildPivot(data) {
+  document.getElementById("filtersBlock").style.display = "flex";
+  window.__LAST_DATA__ = data;
+  if (!COLUMN_B_KEY && data.length) {
+  const headers = Object.keys(data[0]);
+  COLUMN_B_KEY = headers[1]; // Column B
+  COLUMN_C_KEY = headers[2]; // Column C
+  AI_COLUMN = headers[34];   // Same AI column as previous code
+}
     document.getElementById("tableContainer").innerHTML = "";
     window.__ALL_TABLE_BOXES = [];
 
@@ -333,7 +377,23 @@ function buildPivot(data) {
     const pivot = {};
 
     data.forEach(row => {
+      // 🚫 Remove test orders (Column B + Column C)
+const colB = (row[COLUMN_B_KEY] || "")
+  .toString().trim().toLowerCase();
 
+if (colB.startsWith("testing_")) return;
+
+const colC = (row[COLUMN_C_KEY] || "")
+  .toString().trim().toLowerCase();
+
+if (colC === "testing_fabbox") return;
+// 🚫 On-Trip filter
+const onTripChecked = document.getElementById("onTripFilter").checked;
+
+const aiValue = (row[AI_COLUMN] || "")
+  .toString().trim();
+
+if (!onTripChecked && aiValue !== "") return;
         // COLUMN D → Store
         const store = row["Order Dark Store"];
         if (!ALLOWED_STORES.includes(store)) return;
@@ -355,7 +415,18 @@ pivot[store][date] ??= {};
 const rawCJ = row[Object.keys(row)[CJ_INDEX]];
 const cj = parseInt(rawCJ, 10);
 if (isNaN(cj)) return;
+// 🚫 Attempt Filter
+const selectedAttempt = document.getElementById("attemptFilter").value;
 
+if (selectedAttempt !== "all") {
+
+  if (selectedAttempt === "gt3") {
+    if (!(cj > 3)) return;
+  } else {
+    if (cj !== parseInt(selectedAttempt)) return;
+  }
+
+}
 
 pivot[store][date][cj] ??= 0;
 pivot[store][date][cj] += 1;
