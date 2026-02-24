@@ -520,7 +520,8 @@ COLUMN_B_KEY = headers[1]; // Column B
 COLUMN_C_KEY = headers[2]; // Column C
 AI_COLUMN = headers[34];   // AI column
 ORDER_DATE_COLUMN = headers.find(
-  h => h.trim().toLowerCase() === "order date"
+  h => h.toLowerCase().includes("order") &&
+       h.toLowerCase().includes("date")
 );
 
 CLIENT_COLUMN = Object.keys(data[0])
@@ -547,7 +548,7 @@ clients.forEach(client=>{
     dropdown.innerHTML +=
     `<option value="${client}">${client}</option>`;
 });
-
+console.log("Detected ORDER_DATE_COLUMN:", ORDER_DATE_COLUMN);
 }
 function getFilteredData() {
 
@@ -582,34 +583,57 @@ if(!onTripChecked && aiValue !== ""){
 }
 
 // 🚫 3PM Cutoff filter
-if(cutoffChecked && ORDER_DATE_COLUMN){
+// 🚫 3PM Cutoff filter
+if (cutoffChecked && ORDER_DATE_COLUMN) {
 
-  const orderDateStr = row[ORDER_DATE_COLUMN];
-  if(orderDateStr){
+  const orderDateStr = (row[ORDER_DATE_COLUMN] || "")
+  .toString()
+  .replace(/^=\s*"?/, "")     // remove = or ="
+  .replace(/[()"]/g, "")     // remove (, ), "
+  .trim();
+  console.log("Raw Date String:", orderDateStr);
+  if (!orderDateStr) return true;
 
-    // Parse DD/MM/YYYY HH:MM AM/PM safely
-const [datePart, timePart, ampm] = orderDateStr.split(" ");
+  // Expected format: 24/02/2026 02:02 PM
+  const parts = orderDateStr.split(/\s+/);
+  if (parts.length < 3) return true;
 
-const [day, month, year] = datePart.split("/").map(Number);
-let [hours, minutes] = timePart.split(":").map(Number);
+  const [datePart, timePart, ampm] = parts;
 
-if (ampm === "PM" && hours !== 12) hours += 12;
-if (ampm === "AM" && hours === 12) hours = 0;
+  let day, month, year;
 
-const orderDate = new Date(year, month - 1, day, hours, minutes);
+if (datePart.includes("/")) {
+  [day, month, year] = datePart.split("/").map(Number);
+} else if (datePart.includes("-")) {
+  const parts = datePart.split("-").map(Number);
 
-    const now = new Date();
-    const todayDateStr = now.toDateString();
+  // If first part is 4 digits → YYYY-MM-DD
+  if (parts[0] > 31) {
+    [year, month, day] = parts;
+  } else {
+    [day, month, year] = parts;
+  }
+}
+  let [hours, minutes] = timePart.split(":").map(Number);
 
-    if(orderDate.toDateString() === todayDateStr){
+  // Convert to 24-hour format
+  if (ampm.toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
 
-      const cutoffTime = new Date();
-      cutoffTime.setHours(15, 0, 0, 0); // 3:00 PM
+  const now = new Date();
+console.log("Order Date:", day, month, year);
+console.log("Today:", now.getDate(), now.getMonth()+1, now.getFullYear());
+  const isToday =
+    day === now.getDate() &&
+    month === now.getMonth() + 1 &&
+    year === now.getFullYear();
 
-      if(orderDate > cutoffTime){
-        return false;
-      }
+  if (isToday) {
+    const orderTotalMinutes = hours * 60 + minutes;
+    const cutoffMinutes = 15 * 60; // 3 PM
 
+    if (orderTotalMinutes > cutoffMinutes) {
+      return false; // ❌ Remove today orders after 3PM
     }
   }
 }
