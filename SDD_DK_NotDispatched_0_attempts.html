@@ -250,7 +250,7 @@ tfoot td{
 <!-- HEADER -->
 <div class="header">
     <h1>Zippee – Report</h1>
-    <img class="logo" src="https://i.imgur.com/7yUVE8U.png">
+    <img class="logo" src="SASA.png">
 </div>
 
 <!-- CARD -->
@@ -264,7 +264,10 @@ tfoot td{
     <input type="checkbox" id="onTripFilter" checked>
     On-Trip
   </label>
-
+<label style="display:flex; align-items:center; gap:6px; font-weight:700;">
+  <input type="checkbox" id="cutoff3pmFilter" checked>
+  3PM Cutoff
+</label>
   <label style="font-weight:700;">
     Attempts:
     <select id="attemptFilter" style="padding:4px; border-radius:6px;">
@@ -316,9 +319,7 @@ const detailsByStore = {};
 ALLOWED_STORES.forEach(s => detailsByStore[s] = []);
 
 const ALLOWED_STATUS=["Not Dispatched"];
-let COLUMN_B_KEY = "";
-let COLUMN_C_KEY = "";
-let AI_COLUMN = ""; 
+let ORDER_DATE_COLUMN = ""; 
 
 document.getElementById("meta").innerText =
 `Date: ${new Date().toLocaleDateString("en-GB")} | Time: ${new Date().toLocaleTimeString()}`;
@@ -354,21 +355,65 @@ document.getElementById("attemptFilter").addEventListener("change", function () 
         buildPivot(window.__LAST_DATA__);
     }
 });
-const extractDate = v => {
-  if (!v) return "";
-  return v.toString().substring(3, 13);
-};
 
+// 🔄 Rebuild when 3PM cutoff changes
+document.getElementById("cutoff3pmFilter").addEventListener("change", function () {
+    if (window.__LAST_DATA__) {
+        buildPivot(window.__LAST_DATA__);
+    }
+});
+function parseOrderDateTime(rawValue) {
 
+  if (!rawValue) return null;
+
+  const str = rawValue.toString().trim();
+
+  // Try native parsing first
+  const nativeDate = new Date(str);
+  if (!isNaN(nativeDate.getTime())) {
+    return nativeDate;
+  }
+
+  // Manual fallback for DD/MM/YYYY HH:MM AM/PM
+  const parts = str.split(/\s+/);
+  if (parts.length < 2) return null;
+
+  const datePart = parts[0];
+  const timePart = parts[1];
+  const ampm = parts[2] || "";
+
+  let day, month, year;
+
+  if (datePart.includes("/")) {
+    [day, month, year] = datePart.split("/").map(Number);
+  } else if (datePart.includes("-")) {
+    const p = datePart.split("-").map(Number);
+
+    if (p[0] > 31) {
+      [year, month, day] = p;
+    } else {
+      [day, month, year] = p;
+    }
+  } else {
+    return null;
+  }
+
+  let hours = 0;
+  let minutes = 0;
+
+  if (timePart.includes(":")) {
+    [hours, minutes] = timePart.split(":").map(Number);
+  }
+
+  if (ampm.toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
+
+  return new Date(year, month - 1, day, hours, minutes);
+}
 function buildPivot(data) {
   document.getElementById("filtersBlock").style.display = "flex";
   window.__LAST_DATA__ = data;
-  if (!COLUMN_B_KEY && data.length) {
-  const headers = Object.keys(data[0]);
-  COLUMN_B_KEY = headers[1]; // Column B
-  COLUMN_C_KEY = headers[2]; // Column C
-  AI_COLUMN = headers[34];   // Same AI column as previous code
-}
+  
     document.getElementById("tableContainer").innerHTML = "";
     window.__ALL_TABLE_BOXES = [];
 
@@ -377,20 +422,20 @@ function buildPivot(data) {
     const pivot = {};
 
     data.forEach(row => {
-      // 🚫 Remove test orders (Column B + Column C)
-const colB = (row[COLUMN_B_KEY] || "")
+    const headers = Object.keys(row);
+    const colB = (row[headers[1]] || "")   // Column B
   .toString().trim().toLowerCase();
 
 if (colB.startsWith("testing_")) return;
 
-const colC = (row[COLUMN_C_KEY] || "")
+const colC = (row[headers[2]] || "")   // Column C
   .toString().trim().toLowerCase();
 
 if (colC === "testing_fabbox") return;
 // 🚫 On-Trip filter
 const onTripChecked = document.getElementById("onTripFilter").checked;
 
-const aiValue = (row[AI_COLUMN] || "")
+const aiValue = (row[headers[34]] || "")   // AI column
   .toString().trim();
 
 if (!onTripChecked && aiValue !== "") return;
@@ -401,11 +446,45 @@ if (!onTripChecked && aiValue !== "") return;
         // Status
         const status = row["Order Status"];
         if (!ALLOWED_STATUS.includes(status)) return;
+let rawDateValue = row[headers[13]];
 
-        // COLUMN N (index 13) → Date
-        const dateCol = Object.keys(row)[13];
-        const date = extractDate(row[dateCol]);
-        if (!date) return;
+if (rawDateValue) {
+  rawDateValue = rawDateValue
+    .toString()
+    .replace(/[\(\)"=]/g, "")   // 🔥 remove ALL ( ) and " characters
+    .trim();
+}
+ // Column N (0-based index)
+console.log("RAW DATE VALUE:", rawDateValue);
+const parsedDate = parseOrderDateTime(rawDateValue);
+if (!parsedDate) return;
+
+// 🚫 3PM Cutoff Logic
+const cutoffChecked = document.getElementById("cutoff3pmFilter")?.checked;
+
+if (cutoffChecked) {
+
+  const now = new Date();
+
+  const isToday =
+    parsedDate.getDate() === now.getDate() &&
+    parsedDate.getMonth() === now.getMonth() &&
+    parsedDate.getFullYear() === now.getFullYear();
+
+  if (isToday) {
+    const orderMinutes =
+      parsedDate.getHours() * 60 + parsedDate.getMinutes();
+
+    const cutoffMinutes = 15 * 60; // 3PM
+
+    if (orderMinutes > cutoffMinutes) {
+      return; // ❌ Remove today's orders after 3PM
+    }
+  }
+}
+
+// Format for table display
+const date = parsedDate.toLocaleDateString("en-GB");
 // ✅ SAVE RAW ROW FOR STORE-WISE EXCEL
 detailsByStore[store].push(row);
 
@@ -636,93 +715,6 @@ function downloadAllPNGs() {
   });
 </script>
 
-<!-- 🔒 ADD BLOCKERS HERE (NEW SCRIPT) -->
-<script>
-  // ============ ANTI-INSPECT + NO DEVTOOLS ============
-/* 🔒 Temporarily blur screen to spoil screenshots */
-function temporarilyBlur() {
-  // Avoid stacking multiple overlays
-  if (document.querySelector(".screenshot-blur-overlay")) return;
-
-  const overlay = document.createElement("div");
-  overlay.className = "screenshot-blur-overlay";
-  document.body.appendChild(overlay);
-
-  // Remove blur after 1.4 seconds
-  setTimeout(() => {
-    overlay.remove();
-  }, 1400);
-}
-
-  // Detect DevTools by window resize gap
-  setInterval(function () {
-    const threshold = 160;
-    if (
-      window.outerWidth - window.innerWidth > threshold ||
-      window.outerHeight - window.innerHeight > threshold
-    ) {
-      document.body.innerHTML =
-        "<h2 style='text-align:center;margin-top:40px;'>Dev Tools are not allowed 🚫</h2>";
-    }
-  }, 500);
-
-  // Disable right-click everywhere
-  document.addEventListener("contextmenu", function(e){
-    e.preventDefault();
-  });
-
-  // Block common inspect keys
-  document.addEventListener("keydown", function(e){
-
-    // F12
-    if (e.keyCode === 123) e.preventDefault();
-
-    // Ctrl + Shift + I / J / C
-    if (e.ctrlKey && e.shiftKey &&
-       ['I','J','C','i','j','c'].includes(e.key)) {
-        e.preventDefault();
-    }
-
-    // Ctrl + U (View Source)
-    if (e.ctrlKey && ['U','u'].includes(e.key)) {
-        e.preventDefault();
-    }
-
-    // Block any Ctrl+Shift combination
-    if (e.ctrlKey && e.shiftKey) e.preventDefault();
-  });
-  /* ================= SCREENSHOT DETECTION (BEST EFFORT) ================= */
-
-// Windows: Win + Shift + S (Snipping Tool)
-document.addEventListener("keydown", function (e) {
-  if (e.shiftKey && e.metaKey) {
-    temporarilyBlur();
-  }
-});
-
-// Fallback: Shift + S (browser sometimes drops metaKey)
-document.addEventListener("keydown", function (e) {
-  if (e.shiftKey && e.key.toLowerCase() === "s") {
-    temporarilyBlur();
-  }
-});
-
-// macOS: Cmd + Shift + 3 / 4
-document.addEventListener("keydown", function (e) {
-  if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
-    e.preventDefault();
-    temporarilyBlur();
-  }
-});
-
-// Print Screen (some browsers expose it)
-document.addEventListener("keyup", function (e) {
-  if (e.key === "PrintScreen") {
-    temporarilyBlur();
-  }
-});
-
-</script>
 
 </body>
 </html>
