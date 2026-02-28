@@ -74,36 +74,18 @@ th{background:#c55a11;color:white;font-weight:700}
 
 <body>
 
-<div class="header">SASA Automation</div>
+<div class="header">Rider Report</div>
 
 <div class="container">
-
-<!-- TIME SELECT (12 HOUR FORMAT) -->
-<div style="text-align:center;margin-bottom:10px">
-  <label><b>Hour:</b></label>
-  <select id="hourSelect"></select>
-
-  <label style="margin-left:8px"><b>Min:</b></label>
-  <select id="minSelect">
-    <option value="">--</option>
-    <option value="00">00</option>
-    <option value="15">15</option>
-    <option value="30">30</option>
-    <option value="45">45</option>
-  </select>
-
-  <label style="margin-left:8px"><b>AM/PM:</b></label>
-  <select id="ampmSelect">
-    <option value="AM">AM</option>
-    <option value="PM">PM</option>
-  </select>
-</div>
 
 <div class="store-grid" id="storeGrid"></div>
 
 <div style="text-align:center;margin:14px 0">
   <button class="action-btn" onclick="generate()">Generate Reports</button>
   <button class="download-btn" onclick="downloadBoth()">Download Both Reports</button>
+  <button class="download-btn" onclick="downloadSingle('report1','Active_Rider_Report.png')">
+  Download Active Report
+</button>
   <button class="download-btn" onclick="copySummary()">Copy Active + Idle + BF</button>
 </div>
 
@@ -150,22 +132,6 @@ th{background:#c55a11;color:white;font-weight:700}
 </div>
 
 <script>
-/* ===== TIME SETUP (12 HOUR) ===== */
-const hourSel=document.getElementById("hourSelect");
-const minSel=document.getElementById("minSelect");
-const ampmSel=document.getElementById("ampmSelect");
-
-for(let h=1;h<=12;h++){
-  hourSel.add(new Option(h,h));
-}
-
-/* auto set current time */
-const now=new Date();
-let ch=now.getHours();
-ampmSel.value=ch>=12?"PM":"AM";
-ch=ch%12||12;
-hourSel.value=ch;
-minSel.value="";
 
 /* ===== STORES ===== */
 const stores=[
@@ -194,18 +160,32 @@ fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ-18de0srb6yUjkIVdVlZkZ
     h.slice(1).forEach((x,i)=>planned[r[0]][x]=parseInt(r[i+1])||0);
   });
 });
-
 /* ===== HELPERS ===== */
 const bfCls=v=>v>2?"bf-red":v>1.7?"bf-yellow":"bf-green";
 
+
+function getCurrentTime() {
+  const now = new Date();
+
+  let hours = now.getHours();
+  const minutes = now.getMinutes();
+
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+
+  const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+
+  return {
+    displayTime: `${hours}:${formattedMinutes} ${ampm}`,
+    planTime: `${hours}:00 ${ampm}`
+  };
+}
+
 /* ===== GENERATE ===== */
 function generate(){
-  const h=hourSel.value;
-  const m=minSel.value||"00";
-  const ap=ampmSel.value;
-
-  const displayTime=`${h}:${m} ${ap}`;
-  const planTime=`${h}:00 ${ap}`;
+  const timeObj = getCurrentTime();
+const displayTime = timeObj.displayTime;
+const planTime = timeObj.planTime;
 
   time1.innerText=`Time: ${displayTime}`;
   title2.innerText=`Planned Rider Report – Time: ${displayTime}`;
@@ -278,8 +258,7 @@ function copySummary(){
   });
 
   navigator.clipboard.writeText(text.trim())
-  .then(()=> alert("Copied Successfully ✅"))
-  .catch(()=> alert("Copy failed ❌"));
+
 }
 
 /* ===== DOWNLOAD ===== */
@@ -298,85 +277,6 @@ function downloadBoth(){
   downloadSingle("report1","Active_Rider_Report.png");
   setTimeout(()=>downloadSingle("report2","Planned_Rider_Report.png"),700);
 }
-</script>
-<script>
-/* ------------- SCREENSHOT / COPY DETERRENCE -------------- */
-
-/* Temporary Blur Overlay */
-function temporarilyBlur() {
-    const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.inset = "0";
-    overlay.style.backdropFilter = "blur(18px)";
-    overlay.style.background = "rgba(255,255,255,0.25)";
-    overlay.style.zIndex = "999999";
-    overlay.style.pointerEvents = "none";
-    document.body.appendChild(overlay);
-    setTimeout(()=> overlay.remove(), 1400);
-}
-
-/* Windows Snipping Tool (Win + Shift + S fallback detection) */
-document.addEventListener("keydown", function(e){
-    if (e.shiftKey && e.metaKey) {
-        temporarilyBlur();
-    }
-
-    if (e.shiftKey && e.key.toLowerCase() === "s") {
-        temporarilyBlur();
-    }
-});
-
-/* Mac Screenshot */
-document.addEventListener("keydown", function(e){
-    if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
-        e.preventDefault();
-        temporarilyBlur();
-        alert("Mac screenshot shortcut blocked.");
-    }
-});
-
-/* Disable right-click, select, copy */
-document.addEventListener("contextmenu", e => e.preventDefault());
-document.addEventListener("selectstart", e => e.preventDefault());
-document.addEventListener("copy", e => {
-    e.preventDefault();
-    alert("Copying is disabled on this page.");
-});
-
-/* ------------- ANTI-INSPECT / DEVTOOLS -------------- */
-
-/* Detect DevTools */
-setInterval(function () {
-  const threshold = 160;
-  if (
-    window.outerWidth - window.innerWidth > threshold ||
-    window.outerHeight - window.innerHeight > threshold
-  ) {
-    document.body.innerHTML =
-      "<h2 style='text-align:center;margin-top:40px;'>Dev Tools are not allowed 🚫</h2>";
-  }
-}, 500);
-
-/* Block Inspect Keys */
-document.addEventListener("keydown", function(e){
-
-  // F12
-  if (e.keyCode === 123) e.preventDefault();
-
-  // Ctrl + Shift + I / J / C
-  if (e.ctrlKey && e.shiftKey &&
-     ['I','J','C','i','j','c'].includes(e.key)) {
-      e.preventDefault();
-  }
-
-  // Ctrl + U
-  if (e.ctrlKey && ['U','u'].includes(e.key)) {
-      e.preventDefault();
-  }
-
-  // Block any Ctrl + Shift combo
-  if (e.ctrlKey && e.shiftKey) e.preventDefault();
-});
 </script>
 
 </body>
