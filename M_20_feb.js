@@ -93,14 +93,6 @@ let hydDeepPainDetails = [];
 
 const PROJECTION_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9TO8jCWfO7hdQXF5vmwdOj7-VnsTZ-gtSGVfeO2ZepA6Za23hS2P7eCZUKX5vZBl6nWUexc5sPny5/pub?gid=0&single=true&output=csv";
-/* =========================
-   RIDER SHEET (LIVE)
-========================= */
-
-const RIDER_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxR8H_wAas3F98iPMuWFNqGcVUGjI_laYYpPFxXNjiJrS57P3usFZPwDrwHjH73tY5WmaDuca5JK92/pub?gid=0&single=true&output=csv";
-
-let riderSheetData = {};
 
 /* =========================
    LIVE PROJECTION FETCH
@@ -157,41 +149,6 @@ function loadLiveProjections() {
       alert("Failed to load live projections");
     });
 }
-function loadRiderSheet() {
-  fetch(RIDER_CSV_URL)
-    .then(res => res.text())
-    .then(csvText => {
-      const workbook = XLSX.read(csvText, { type: "string" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-      riderSheetData = {};
-
-      rows.forEach(row => {
-        let store = (row["Store"] || "")
-          .trim()
-          .toLowerCase()
-          .replace(/_/g, " ")
-          .replace(/\s+/g, " ");
-
-        // ensure format matches your system
-        if (!store.endsWith(" mnow")) {
-          store = store + " mnow";
-        }
-
-        riderSheetData[store] = {
-          active: Number(row["Actual Rider"]) || 0,
-          idle: Number(row["Idle Rider"]) || 0,
-          bf: Number(row["Banner Factor"]) || 0
-        };
-      });
-
-      console.log("Rider Sheet Loaded:", riderSheetData);
-    })
-    .catch(err => {
-      console.error("Rider sheet fetch failed:", err);
-    });
-}
 
 /* =========================
    DATE HELPERS
@@ -237,7 +194,6 @@ function updateDateTime() {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadLiveProjections();
-  loadRiderSheet();   // ✅ NEW
   updateCurrentDateHeader();
   updateDateTime();
 
@@ -745,11 +701,9 @@ const hourLabel = getCumulativeHourLabel(getEffectiveHour());
     const deepPainColor = deepPainPct < 5 ? "#1B5E20" : "#7A1F1F";
 
 
-    const riderData = riderSheetData[store] || {};
-
-const actualRiders = riderData.active || 0;
-const idleRider = riderData.idle || 0;
-const bf = riderData.bf || 0;
+    const actualRiders = Number(tds[8]?.querySelector("input")?.value) || 0;
+    const idleRider = Number(tds[9]?.querySelector("input")?.value) || 0;
+    const bf = Number(tds[10]?.querySelector("input")?.value) || 0;
 
     /* ===== Projection lookup ===== */
     const proj = getProjectionForStore(store);
@@ -1112,3 +1066,31 @@ function showHYDDeepPain() {
 
   renderDeepPainTable(hydDeepPain, "hydDeepPainTable");
 }
+document.addEventListener("paste", function(e) {
+  const active = document.activeElement;
+
+  if (!active.classList.contains("summary-input")) return;
+
+  e.preventDefault();
+
+  const pasteData = (e.clipboardData || window.clipboardData).getData("text");
+
+  const rows = pasteData.trim().split("\n").map(r => r.split("\t"));
+
+  const allInputs = Array.from(document.querySelectorAll(".summary-input"));
+
+  const startIndex = allInputs.indexOf(active);
+
+  if (startIndex === -1) return;
+
+  let index = startIndex;
+
+  rows.forEach(row => {
+    row.forEach(cell => {
+      if (allInputs[index]) {
+        allInputs[index].value = cell.trim();
+        index++;
+      }
+    });
+  });
+});
