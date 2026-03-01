@@ -173,7 +173,7 @@ function generate(){
   body1.innerHTML="";
   body2.innerHTML="";
 
-  let ta=0,ti=0,tbf=0,c=0;
+  let ta=0,ti=0,tp=0,tbf=0,c=0;
   let pp=0,pa=0,pd=0;
 
   blocks.forEach(block=>{
@@ -183,6 +183,7 @@ function generate(){
     const activeMatch=block.match(/Active:\s*(\d+)/);
     const idleMatch=block.match(/Idle:\s*(\d+)/);
     const bannerMatch=block.match(/Banner:\s*([\d.]+)/);
+    const pendingMatch = block.match(/Pending:\s*(\d+)/);
 
     if(!storeMatch)return;
 
@@ -190,9 +191,11 @@ function generate(){
     const active=activeMatch?parseInt(activeMatch[1]):0;
     const idle=idleMatch?parseInt(idleMatch[1]):0;
     const banner=bannerMatch?parseFloat(bannerMatch[1]):0;
+    const pending = pendingMatch ? parseInt(pendingMatch[1]) : 0;
 
     ta+=active;
     ti+=idle;
+    tp+=pending;
     if(banner){tbf+=banner;c++;}
 
     body1.innerHTML+=`
@@ -200,7 +203,7 @@ function generate(){
         <td>${store}</td>
         <td>${active}</td>
         <td>${idle}</td>
-        <td>0</td>
+        <td>${pending}</td>
         <td class="${bfCls(banner)}">${banner.toFixed(2)}</td>
       </tr>`;
 
@@ -227,7 +230,7 @@ function generate(){
       <td>Total</td>
       <td>${ta}</td>
       <td>${ti}</td>
-      <td>0</td>
+      <td>${tp}</td>
       <td class="${bfCls(tbf/c)}">${c?(tbf/c).toFixed(2):"0.00"}</td>
     </tr>`;
 
