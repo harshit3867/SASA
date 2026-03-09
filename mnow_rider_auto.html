@@ -95,6 +95,7 @@ th{background:#c55a11;color:white;font-weight:700}
         <th>Darkstore Name</th>
         <th>Active Riders</th>
         <th>Idle Riders</th>
+        <th>Check Out Rider</th>
         <th>Pending Orders</th>
         <th>BF</th>
       </tr>
@@ -113,6 +114,7 @@ th{background:#c55a11;color:white;font-weight:700}
         <th>Darkstore Name</th>
         <th>Planned Riders</th>
         <th>Active Riders</th>
+        <th>Check Out Rider</th>
         <th>Difference</th>
       </tr>
     </thead>
@@ -164,7 +166,7 @@ function getCurrentTime(){
 function generate(){
 
   const raw=document.getElementById("bulkData").value;
-  const blocks=raw.split("----------------------");
+  const blocks=raw.split("-------------------------------------------");
 
   const timeObj=getCurrentTime();
   time1.innerText=`Time: ${timeObj.displayTime}`;
@@ -173,28 +175,31 @@ function generate(){
   body1.innerHTML="";
   body2.innerHTML="";
 
-  let ta=0,ti=0,tp=0,tbf=0,c=0;
-  let pp=0,pa=0,pd=0;
+  let ta=0,ti=0,tc=0,tp=0,tbf=0,c=0;
+  let pp=0,pa=0,pc=0,pd=0;
 
   blocks.forEach(block=>{
     if(!block.trim())return;
 
     const storeMatch=block.match(/Store:\s*(.*)/);
-    const activeMatch=block.match(/Active:\s*(\d+)/);
-    const idleMatch=block.match(/Idle:\s*(\d+)/);
-    const bannerMatch=block.match(/Banner:\s*([\d.]+)/);
-    const pendingMatch = block.match(/Pending:\s*(\d+)/);
+    const activeMatch=block.match(/Active Riders\s*:\s*(\d+)/);
+    const idleMatch=block.match(/Idle Riders\s*:\s*(\d+)/);
+    const checkoutMatch=block.match(/Checked Out\s*:\s*(\d+)/);
+    const bannerMatch=block.match(/Banner Factor\s*:\s*([\d.]+)/);
+    const pendingMatch = block.match(/Pending Orders\s*:\s*(\d+)/);
 
     if(!storeMatch)return;
 
     const store=storeMatch[1].replace("_mnow"," Mnow").trim();
     const active=activeMatch?parseInt(activeMatch[1]):0;
     const idle=idleMatch?parseInt(idleMatch[1]):0;
+    const checkout=checkoutMatch?parseInt(checkoutMatch[1]):0;
     const banner=bannerMatch?parseFloat(bannerMatch[1]):0;
-    const pending = pendingMatch ? parseInt(pendingMatch[1]) : 0;
+    const pending=pendingMatch?parseInt(pendingMatch[1]):0;
 
     ta+=active;
     ti+=idle;
+    tc+=checkout;
     tp+=pending;
     if(banner){tbf+=banner;c++;}
 
@@ -203,6 +208,7 @@ function generate(){
         <td>${store}</td>
         <td>${active}</td>
         <td>${idle}</td>
+        <td>${checkout}</td>
         <td>${pending}</td>
         <td class="${bfCls(banner)}">${banner.toFixed(2)}</td>
       </tr>`;
@@ -212,6 +218,7 @@ function generate(){
 
     pp+=plannedVal;
     pa+=active;
+    pc+=checkout;
     pd+=diff;
 
     body2.innerHTML+=`
@@ -219,6 +226,7 @@ function generate(){
         <td>${store}</td>
         <td>${plannedVal}</td>
         <td>${active}</td>
+        <td>${checkout}</td>
         <td class="${diff>0?"diff-pos":diff<0?"diff-neg":""}">
           ${diff}
         </td>
@@ -230,6 +238,7 @@ function generate(){
       <td>Total</td>
       <td>${ta}</td>
       <td>${ti}</td>
+      <td>${tc}</td>
       <td>${tp}</td>
       <td class="${bfCls(tbf/c)}">${c?(tbf/c).toFixed(2):"0.00"}</td>
     </tr>`;
@@ -239,6 +248,7 @@ function generate(){
       <td>Total</td>
       <td>${pp}</td>
       <td>${pa}</td>
+      <td>${pc}</td>
       <td class="${pd>0?"diff-pos":pd<0?"diff-neg":""}">
         ${pd}
       </td>
@@ -258,10 +268,12 @@ function downloadSingle(id,name){
     a.click();
   });
 }
+
 function downloadBoth(){
   downloadSingle("report1","Active_Rider_Report.png");
   setTimeout(()=>downloadSingle("report2","Planned_Rider_Report.png"),700);
 }
+
 </script>
 
 </body>
