@@ -166,7 +166,7 @@ function getCurrentTime(){
 function generate(){
 
   const raw=document.getElementById("bulkData").value;
-  const blocks=raw.split("-------------------------------------------");
+  const blocks=raw.split("----------------------");
 
   const timeObj=getCurrentTime();
   time1.innerText=`Time: ${timeObj.displayTime}`;
@@ -182,11 +182,11 @@ function generate(){
     if(!block.trim())return;
 
     const storeMatch=block.match(/Store:\s*(.*)/);
-    const activeMatch=block.match(/Active Riders\s*:\s*(\d+)/);
-    const idleMatch=block.match(/Idle Riders\s*:\s*(\d+)/);
-    const checkoutMatch=block.match(/Checked Out\s*:\s*(\d+)/);
-    const bannerMatch=block.match(/Banner Factor\s*:\s*([\d.]+)/);
-    const pendingMatch = block.match(/Pending Orders\s*:\s*(\d+)/);
+    const activeMatch=block.match(/Active\s*:\s*(\d+)/);
+const idleMatch=block.match(/Idle\s*:\s*(\d+)/);
+const checkoutMatch=block.match(/Checkout\s*:\s*(\d+)/);
+const bannerMatch=block.match(/Banner\s*:\s*([\d.]+)/);
+const pendingMatch=block.match(/Pending\s*:\s*(\d+)/);
 
     if(!storeMatch)return;
 
