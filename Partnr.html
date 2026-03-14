@@ -43,7 +43,10 @@ display:flex;
 justify-content:space-between;
 align-items:center
 }
-
+th{
+background:#f4f6f8;
+font-weight:700;
+}
 .logo{height:48px}
 
 .card{
@@ -265,6 +268,20 @@ if(status.includes("delivered")){
     cities[city].delivered++
 
     let orderDate = parseIndianDate(r[6])
+if(orderDate){
+
+let storeOpen = new Date(
+orderDate.getFullYear(),
+orderDate.getMonth(),
+orderDate.getDate(),
+9,30,0
+)
+
+if(orderDate < storeOpen){
+    orderDate = storeOpen
+}
+
+}
 let pickupDate = parseIndianDate(r[7])
 let deliveryDate = parseIndianDate(r[30])
 
@@ -436,3 +453,4 @@ a.click()
 
 </body>
 </html>
+```
