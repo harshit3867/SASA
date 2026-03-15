@@ -254,16 +254,21 @@ deliverySum:0,
 deliveryCount:0,
 shipped:0,
 cancelled:0,
-open:0
+open:0,
+rto:0
 }
 
 }
 
 cities[city].total++
 
-status=(status+"").toLowerCase()
+status = (status+"")
+        .replace(/\r/g,"")
+        .replace(/\n/g,"")
+        .trim()
+        .toLowerCase()
 
-if(status.includes("delivered")){
+if(status === "delivered"){
 
     cities[city].delivered++
 
@@ -290,7 +295,11 @@ if(typeof r[6] === "number") orderDate = new Date((r[6]-25569)*86400000)
 if(typeof r[7] === "number") pickupDate = new Date((r[7]-25569)*86400000)   // ⭐ MISSING LINE
 if(typeof r[30] === "number") deliveryDate = new Date((r[30]-25569)*86400000)
 
-    let diffMinutes = (deliveryDate - orderDate) / 60000
+    let diffMinutes = null
+
+if(orderDate && deliveryDate){
+    diffMinutes = (deliveryDate - orderDate) / 60000
+}
     // Delivery time logic (Excel formula equivalent)
 if(deliveryDate && pickupDate){
 
@@ -331,10 +340,25 @@ cities[city].breachAbove++
 
 }
 
-if(status.includes("shipped")) cities[city].shipped++
-if(status.includes("cancel")) cities[city].cancelled++
-if(status.includes("open")) cities[city].open++
+if(status === "delivered"){
+    // already counted above
+}
 
+else if(status === "shipped"){
+    cities[city].shipped++
+}
+
+else if(status === "shipped & cancelled"){
+    cities[city].cancelled++
+}
+
+else if(status === "isrtoinitiated"){
+    cities[city].rto++
+}
+
+else if(status === "open"){
+    cities[city].open++
+}
 })
 
 const cityOrder = ["Bommasandra","Frazer Town","Yeshwantpur","Badshahpur"]
@@ -401,9 +425,10 @@ row("4.1","Non Breach %",d=>((d.nonbreach/d.delivered||0)*100).toFixed(0)+"%")
 row("4.2","Avg. Delivery Time",
 d=> d.deliveryCount ? Math.round(d.deliverySum/d.deliveryCount)+" mins" : "0 mins")
 
-row(5,"Return to Origin (RTO)",d=>0)
+row(5,"Return to Origin (RTO)",d=>d.rto||0)
 
-row("","Return to Orgin %",d=>"0%")
+row("","Return to Orgin %",
+d=>((d.rto/d.total||0)*100).toFixed(0)+"%")
 
 row(6,"Shipped",d=>d.shipped||0)
 
@@ -453,4 +478,3 @@ a.click()
 
 </body>
 </html>
-```
