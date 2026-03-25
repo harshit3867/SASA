@@ -811,7 +811,7 @@ footerRow.innerHTML = `
         border-top:1px solid #ddd;
         letter-spacing:0.3px;
       ">
-    Powered by SASA Automation | Harshit Saini – Data Analyst, Zippee
+    Powered by SASA Automation | Zippee
   </td>
 `;
 
