@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Daily Pivot Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    body { font-family: Arial; padding: 20px; background:#f5f6fa }
+    h2 { margin-bottom: 10px }
+    input { margin: 10px 0 }
+
+    table {
+      border-collapse: collapse;
+      width: auto;
+      margin: 20px auto;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: center;
+    }
+
+    th {
+      background: #2f3640;
+      color: white;
+    }
+
+    .location {
+      text-align:left;
+      font-weight:600;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📊 Daily Pivot Generator</h2>
+<input type="file" id="fileInput" />
+
+<table id="outputTable"></table>
+
+<script>
+
+document.getElementById('fileInput').addEventListener('change', handleFile);
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet);
+
+    createPivot(json);
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+// 🔥 Extract Store + Brand
+function extractParts(locationRaw){
+  if(!locationRaw) return {store:'', brand:''};
+
+  let parts = locationRaw.replace(/\[|\]/g,'').split('-');
+
+  return {
+    store: parts[0]?.trim() || '',
+    brand: parts[1]?.trim() || ''
+  };
+}
+
+function createPivot(data) {
+  const pivot = {};
+
+  data.forEach(row => {
+    const locationRaw = row['Location Name'];
+    const status = row['Bill Status'];
+    const sales = parseFloat(row['Net Sales']) || 0;
+
+    if (!locationRaw || !status) return;
+
+    const {store, brand} = extractParts(locationRaw);
+const city = row['City'] || 'Unknown';
+
+    const key = city + '|' + store + '|' + brand;
+
+    if (!pivot[key]) {
+      pivot[key] = {
+        city,
+        store,
+        brand,
+        settled: {count:0, sum:0},
+        voided: {count:0, sum:0},
+        totalCount: 0,
+        totalSum: 0
+      };
+    }
+
+    let p = pivot[key];
+
+    if (status === 'Settled' || status === 'DELIVERED') {
+      p.settled.count++;
+      p.settled.sum += sales;
+    }
+
+    if (status === 'Voided' || status === 'CANCELLED') {
+      p.voided.count++;
+      p.voided.sum += sales;
+    }
+
+    p.totalCount++;
+    p.totalSum += sales;
+
+  });
+
+  renderTable(pivot);
+}
+
+function renderTable(pivot) {
+  const table = document.getElementById('outputTable');
+  table.innerHTML = '';
+
+  table.innerHTML += `
+    <tr>
+      <th rowspan="2">City</th>
+      <th rowspan="2">Location Name</th>
+      <th rowspan="2">Brand</th>
+      <th colspan="2">Settled</th>
+      <th colspan="2">Voided</th>
+      <th rowspan="2">Total Count</th>
+      <th rowspan="2">Total Sum of Net Sales</th>
+    </tr>
+    <tr>
+      <th>Count</th>
+      <th>Sum</th>
+      <th>Count</th>
+      <th>Sum</th>
+    </tr>
+  `;
+
+  Object.values(pivot).forEach(row => {
+
+    table.innerHTML += `
+      <tr>
+        <td>${row.city}</td>
+        <td class="location">${row.store}</td>
+        <td>${row.brand}</td>
+        <td>${row.settled.count}</td>
+        <td>${row.settled.sum.toFixed(2)}</td>
+        <td>${row.voided.count}</td>
+        <td>${row.voided.sum.toFixed(2)}</td>
+        <td>${row.totalCount}</td>
+        <td>${row.totalSum.toFixed(2)}</td>
+      </tr>
+    `;
+
+  });
+}
+
+</script>
+
+</body>
+</html>
