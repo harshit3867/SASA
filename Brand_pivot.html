@@ -185,7 +185,19 @@ function renderTable(pivot) {
     </tr>
   `;
 
-  Object.values(pivot).forEach(row => {
+  const sortedData = Object.values(pivot).sort((a, b) => {
+  // Sort by City (A → Z)
+  if (a.city.toLowerCase() < b.city.toLowerCase()) return -1;
+  if (a.city.toLowerCase() > b.city.toLowerCase()) return 1;
+
+  // If City same → Sort by Location Name (Store)
+  if (a.store.toLowerCase() < b.store.toLowerCase()) return -1;
+  if (a.store.toLowerCase() > b.store.toLowerCase()) return 1;
+
+  return 0;
+});
+
+sortedData.forEach(row => {
     table.innerHTML += `
       <tr>
         <td>${row.city}</td>
@@ -216,7 +228,17 @@ function renderSummary(summary){
     </tr>
   `;
 
-  Object.values(summary).forEach(row => {
+  const sortedSummary = Object.values(summary).sort((a, b) => {
+  if (a.city.toLowerCase() < b.city.toLowerCase()) return -1;
+  if (a.city.toLowerCase() > b.city.toLowerCase()) return 1;
+
+  if (a.store.toLowerCase() < b.store.toLowerCase()) return -1;
+  if (a.store.toLowerCase() > b.store.toLowerCase()) return 1;
+
+  return 0;
+});
+
+sortedSummary.forEach(row => {
     const total = row.complete + row.cancel;
 
     table.innerHTML += `
