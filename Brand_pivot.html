@@ -84,7 +84,19 @@ function extractParts(locationRaw){
     brand: parts[1]?.trim() || ''
   };
 }
+function normalizeCity(cityRaw) {
+  if (!cityRaw) return 'Unknown';
 
+  const city = cityRaw.toLowerCase().trim();
+
+  const ncrCities = ['delhi', 'gurgaon', 'gurugram', 'noida', 'faridabad'];
+
+  if (ncrCities.includes(city)) {
+    return 'Delhi NCR';
+  }
+
+  return cityRaw;
+}
 function createPivot(data) {
   const pivot = {};
   const summary = {};
@@ -93,7 +105,7 @@ function createPivot(data) {
     const locationRaw = row['Location Name'];
     const status = row['Bill Status'];
     const sales = parseFloat(row['Net Sales']) || 0;
-    const city = row['City'] || 'Unknown';
+    const city = normalizeCity(row['City']);  
 
     if (!locationRaw || !status) return;
 
