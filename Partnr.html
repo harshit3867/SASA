@@ -234,6 +234,10 @@ let cities={}
     
 dataset.forEach(r=>{
 
+let trackingNo = (r[4] + "").trim()
+
+if(trackingNo.startsWith("Z0")) return
+
 let status=r[5]     // column F
 let city=(r[21]+"").split(" ").slice(2).join(" ")
 
