@@ -259,7 +259,8 @@ deliveryCount:0,
 shipped:0,
 cancelled:0,
 open:0,
-rto:0
+rto:0,
+picked:0
 }
 
 }
@@ -363,6 +364,9 @@ else if(status === "isrtoinitiated"){
 else if(status === "open"){
     cities[city].open++
 }
+else if(status === "picked"){
+    cities[city].picked++
+}
 })
 
 const cityOrder = ["Bommasandra","Frazer Town","Yeshwantpur","Badshahpur"]
@@ -442,7 +446,7 @@ row(8,"Open",d=>d.open||0)
 
 row(9,"Packed",d=>0)
 
-row(10,"Picked",d=>0)
+row(10,"Picked",d=>d.picked||0)
 
 document.getElementById("finalReportTable").innerHTML=html
 
