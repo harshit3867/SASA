@@ -128,6 +128,7 @@ th,td{
 
     <div class="controls">
         <input type="file" id="multiUpload" accept=".xlsx,.xls,.csv" multiple>
+        <input type="date" id="reportDate">
         <button class="button" onclick="generateReport()">Generate Report</button>
         <button class="button" onclick="downloadImage()">Download as Image</button>
         <button class="button whatsapp-button" onclick="shareWhatsApp()">Share on WhatsApp 💬</button>
@@ -376,19 +377,25 @@ function processCombined(json){
 }
 
 function fillDateTime(){
-    const d = new Date();
+    const selectedDate = document.getElementById("reportDate").value;
+
+    let d;
+
+    if(selectedDate){
+        d = new Date(selectedDate);
+    } else {
+        d = new Date();
+    }
 
     document.getElementById("autoDate").innerText =
         d.toLocaleDateString('en-GB',{day:"2-digit",month:"short",year:"numeric"});
 
-    // hour only
-    let h = d.getHours();
+    let h = new Date().getHours();
     let ampm = h >= 12 ? "PM" : "AM";
     h = h % 12 || 12;
 
     document.getElementById("autoTime").innerText = `${h} ${ampm}`;
 }
-
 function downloadImage(){
     const element=document.getElementById("captureBox");
     html2canvas(element,{backgroundColor:"#ffffff",scale:3,scrollX:0,scrollY:0}).then(canvas=>{
