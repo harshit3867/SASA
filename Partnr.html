@@ -215,7 +215,9 @@ if(!str) return null
 
 let [date,time,ampm] = str.split(" ")
 
-let [day,month,year] = date.split("/")
+let [day,month,year] = date.includes("-")
+    ? date.split("-")
+    : date.split("/")
 
 let [hour,minute] = time.split(":")
 
@@ -239,6 +241,28 @@ let trackingNo = (r[4] + "").trim()
 if(trackingNo.startsWith("Z0")) return
 
 let status=r[5]     // column F
+let orderDate = parseIndianDate(r[6])
+
+// REMOVE today's orders after 18:30
+if(orderDate){
+    let now = new Date()
+
+    let isToday =
+        orderDate.getDate() === now.getDate() &&
+        orderDate.getMonth() === now.getMonth() &&
+        orderDate.getFullYear() === now.getFullYear()
+
+    let cutoff = new Date(
+        orderDate.getFullYear(),
+        orderDate.getMonth(),
+        orderDate.getDate(),
+        18,30,0
+    )
+
+    if(isToday && orderDate > cutoff){
+        return
+    }
+}
 let city=(r[21]+"").split(" ").slice(2).join(" ")
 
 if(!city) return
@@ -278,6 +302,7 @@ if(status === "delivered"){
     cities[city].delivered++
 
     let orderDate = parseIndianDate(r[6])
+    
 if(orderDate){
 
 let storeOpen = new Date(
