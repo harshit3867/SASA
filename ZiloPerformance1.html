@@ -16,7 +16,7 @@ h1{margin-bottom:10px}
 .filter{margin-bottom:15px}
 select{padding:8px;border-radius:6px;border:none}
 
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 .card{background:#121a2b;padding:15px;border-radius:12px}
 .card h3{font-size:12px;opacity:.7;margin:0}
 .card h2{margin:6px 0 0}
@@ -50,7 +50,6 @@ select{padding:8px;border-radius:6px;border:none}
 <div class="card"><h3>Attainment %</h3><h2 id="att"></h2></div>
 <div class="card"><h3>SLA %</h3><h2 id="sla"></h2></div>
 <div class="card"><h3>Rider Attainment</h3><h2 id="rider"></h2></div>
-<div class="card"><h3>Breach %</h3><h2 id="breach"></h2></div>
 <div class="card"><h3>Deep Pain</h3><h2 id="deep"></h2></div>
 </div>
 
@@ -170,7 +169,7 @@ const c = new Chart(box.querySelector('canvas'), config);
 
 // KPI FIX (ONLY VALID DATA)
 function kpis(filter){
-  let tot=0,att=0,sla=0,rider=0,breach=0,deep=0,n=0;
+  let tot=0,att=0,sla=0,rider=0,deep=0,n=0;
   const today=new Date().getDate();
   const stores=filter==='All'?['Malad','Ghatkopar']:[filter];
 
@@ -185,7 +184,6 @@ function kpis(filter){
       att+=percent(r["Attainment %"]);
       sla+=percent(r["SLA %"]);
       rider+=percent(r["Rider Attainment"]);
-      breach+=percent(r["Breach%"]);
       deep+=+r["Deep Pain"]||0;
       n++;
     });
@@ -195,7 +193,6 @@ function kpis(filter){
   document.getElementById('att').innerText=(att/n).toFixed(1)+'%';
   document.getElementById('sla').innerText=(sla/n).toFixed(1)+'%';
   document.getElementById('rider').innerText=(rider/n).toFixed(1)+'%';
-  document.getElementById('breach').innerText=(breach/n).toFixed(1)+'%';
   document.getElementById('deep').innerText=deep;
 }
 
